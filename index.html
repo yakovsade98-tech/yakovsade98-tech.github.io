@@ -839,8 +839,6 @@ body:not(.cloud) .cloud-only { display: none !important; }
 .sync-pill.ok { color: var(--ok); background: var(--ok-bg); border-color: transparent; }
 .sync-pill.busy { color: var(--warn); background: var(--warn-bg); border-color: transparent; }
 .sync-pill.err { color: var(--danger); background: var(--danger-bg); border-color: transparent; }
-.login-err { color: var(--danger); font-size: 13.5px; font-weight: 600; min-height: 20px; margin-top: 8px; }
-#btn-login, #btn-logout { white-space: nowrap; }
 @media (max-width: 520px) { .sync-pill .txt { display: none; } .sync-pill { padding: 6px; } }
 
 /* ---- quick plus / minus ---- */
@@ -946,7 +944,6 @@ table.hist-table { width: 100%; border-collapse: collapse; font-size: 13px; }
       </div>
       <div class="header-actions">
         <span class="sync-pill cloud-only" id="sync-pill" title=""><span class="txt" id="sync-text">טוען…</span></span>
-        <button class="btn btn-primary btn-sm cloud-only view-only" id="btn-login" type="button">🔒 כניסה לעריכה</button>
         <button class="btn btn-outline hide-sm edit-only" id="btn-import" type="button"></button>
         <button class="btn btn-outline hide-sm edit-only" id="btn-import-img" type="button"></button>
         <button class="btn btn-outline hide-sm" id="btn-export" type="button"></button>
@@ -965,7 +962,7 @@ table.hist-table { width: 100%; border-collapse: collapse; font-size: 13px; }
             <button type="button" id="btn-restore" class="edit-only"></button>
             <button type="button" id="btn-settings" class="edit-only"></button>
             <button type="button" id="btn-delete-all" class="danger-item edit-only"></button>
-            <button type="button" id="btn-logout" class="cloud-only edit-only">🔓 יציאה ממצב עריכה</button>
+            <button type="button" id="btn-editor-name" class="cloud-only">שם העורך</button>
           </div>
         </div>
         <button class="btn btn-icon" id="theme-btn" type="button" title="מצב תצוגה" aria-label="החלפת מצב כהה"></button>
@@ -1044,8 +1041,6 @@ table.hist-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 
         <div class="empty" id="empty-state">
           <div class="dropzone" id="dropzone">
-            <h3 class="view-only">המלאי עדיין ריק</h3>
-            <p class="view-only">עדיין לא הוזנו פריטים. מי שיש לו סיסמה יכול להיכנס לעריכה ולהוסיף מלאי.</p>
             <h3 class="edit-only">המערכת מוכנה לקלוט מלאי</h3>
             <p class="edit-only">גררו לכאן קובץ אקסל, CSV או תמונה של רשימה, או בחרו קובץ. בטלפון אפשר גם לצלם את הרשימה. העמודות יזוהו אוטומטית, ואפשר לתקן לפני הייבוא.</p>
             <div class="empty-actions edit-only">
@@ -1202,17 +1197,15 @@ table.hist-table { width: 100%; border-collapse: collapse; font-size: 13px; }
   </div>
 
   <!-- Confirm -->
-  <div class="overlay" id="login-modal">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="login-title" style="max-width:420px">
-      <h2 id="login-title">כניסה לעריכה</h2>
-      <p class="lead">כדי להוסיף, לערוך, למחוק או לייבא מלאי צריך את סיסמת העריכה. הסיסמה תישמר במכשיר הזה עד שתצאו ממצב עריכה.</p>
-      <form id="login-form">
-        <label class="fld"><span>סיסמה</span><input id="login-pass" type="password" autocomplete="current-password" required /></label>
-        <label class="fld" style="margin-top:10px"><span>שם העורך (לא חובה) — יופיע בהיסטוריית השינויים</span><input id="login-name" type="text" autocomplete="nickname" maxlength="40" placeholder="לדוגמה: יעקב" /></label>
-        <div class="login-err" id="login-err" role="alert"></div>
+  <div class="overlay" id="name-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="name-title" style="max-width:420px">
+      <h2 id="name-title">שם העורך</h2>
+      <p class="lead">השם יופיע בהיסטוריית השינויים, כדי שיהיה ברור מי ערך את המלאי. אפשר לדלג או לשנות אחר כך.</p>
+      <form id="name-form">
+        <label class="fld"><span>שם (לא חובה)</span><input id="editor-name-input" type="text" autocomplete="nickname" maxlength="40" placeholder="לדוגמה: יעקב" /></label>
         <div class="modal-actions">
-          <button type="button" class="btn btn-ghost" data-close="login-modal">ביטול</button>
-          <div class="right"><button type="submit" class="btn btn-primary" id="login-submit">כניסה</button></div>
+          <button type="button" class="btn btn-ghost" id="name-skip">דילוג</button>
+          <div class="right"><button type="submit" class="btn btn-primary" id="name-save">שמירה</button></div>
         </div>
       </form>
     </div>
@@ -1328,16 +1321,15 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   <script>(function () {
   "use strict";
 
-  /* ===== כתובת השרת (Google Apps Script Web App) =====
-     להדביק כאן את כתובת ה-Web App שמסתיימת ב-/exec.
-     ריק = מצב מקומי בלבד (כמו קודם: עריכה חופשית, שמירה בדפדפן בלבד). */
+  /* ===== כתובת השרת (Cloudflare Worker) =====
+     ריק = מצב מקומי בלבד (עריכה חופשית, שמירה בדפדפן בלבד). */
   const BACKEND_URL = "https://yuvalim-inventory.yuvalim.workers.dev";
 
   const STORAGE_KEY = "fwYakovInventory.v1";        // local cache of the shared inventory
-  const AUTH_KEY = "yuvalimInventory.editPassword"; // edit password remembered on this device
   const THEME_KEY = "yuvalimInventory.darkMode";    // per-device theme
   const LEGACY_KEY = "yuvalimInventory.localBeforeCloud"; // data that existed only on this device before the cloud
   const EDITOR_KEY = "yuvalimInventory.editorName";      // optional editor name shown in the change history
+  const EDITOR_ASKED_KEY = "yuvalimInventory.editorAsked"; // asked once for the optional editor name
   const LOCAL_HIST_KEY = "yuvalimInventory.localHistory"; // change history when there is no backend
   const HISTORY_LIMIT = 500;
   const CLOUD = !!BACKEND_URL;
@@ -1615,7 +1607,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   let ocrCancelled = false;
   let persistTimer = null;
   const sync = {
-    version: 0, updatedAt: null, password: null,
+    version: 0, updatedAt: null,
     dirty: false, saving: false, fetching: false,
     online: true, loadedOnce: false, cacheFromCloud: false, saveTimer: null
   };
@@ -1696,11 +1688,6 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   function persist() {
     writeCache();
     if (!CLOUD) return;
-    if (!sync.password) {
-      // should not happen (UI is read-only) — never push without a password
-      fetchRemote(true);
-      return;
-    }
     sync.dirty = true;
     setSyncStatus();
     scheduleSave(SAVE_DEBOUNCE_MS);
@@ -1715,11 +1702,10 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     };
   }
 
-  function canEdit() { return !CLOUD || !!sync.password; }
+  function canEdit() { return true; }
 
   function requireEdit() {
     if (canEdit()) return true;
-    showToast("צפייה בלבד — כדי לערוך יש ללחוץ על «כניסה לעריכה»");
     return false;
   }
 
@@ -1808,14 +1794,13 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   async function saveRemote() {
     if (!CLOUD || !sync.dirty) return;
     if (sync.saving) { scheduleSave(400); return; }
-    if (!sync.password) return;
     sync.saving = true;
     sync.dirty = false;
     setSyncStatus();
     let resp = null;
     const sentHist = pendingHistory.splice(0, pendingHistory.length);
     try {
-      const body = { action: "save", password: sync.password, baseVersion: sync.version, data: sharedPayload() };
+      const body = { action: "save", baseVersion: sync.version, data: sharedPayload() };
       if (sentHist.length) body.history = sentHist;
       resp = await apiPost(body);
     } catch (e) {
@@ -1844,11 +1829,6 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       pendingHistory = sentHist.concat(pendingHistory);
       sync.dirty = true;
       scheduleSave(1500);
-    } else if (resp && resp.error === "auth") {
-      sync.dirty = false;
-      logout(true);
-      showToast("הסיסמה שגויה או שהוחלפה — השינוי לא נשמר. יש להיכנס לעריכה מחדש.");
-      fetchRemote(true);
     } else if (resp && resp.error === "conflict") {
       sync.dirty = false;
       applyRemote(resp);
@@ -1870,7 +1850,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     const pill = $("#sync-pill");
     const txt = $("#sync-text");
     if (!pill || !txt) return;
-    let cls = "ok", label = canEdit() ? "מצב עריכה · נשמר" : "צפייה בלבד";
+    let cls = "ok", label = "נשמר";
     if (sync.saving || sync.dirty) { cls = "busy"; label = "שומר…"; }
     else if (!sync.online) { cls = "err"; label = "אין חיבור · עותק שמור"; }
     else if (!sync.loadedOnce) { cls = "busy"; label = "טוען…"; }
@@ -1878,60 +1858,53 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     txt.textContent = label;
     pill.title = label + (sync.updatedAt ? " · עודכן לאחרונה " + new Date(sync.updatedAt).toLocaleString("he-IL") : "");
     const note = $("#footer-note");
-    if (note) note.textContent = canEdit()
-      ? "מצב עריכה: כל שינוי נשמר אוטומטית בענן ומופיע אצל כל מי שפותח את הקישור. מומלץ לייצא לאקסל גיבוי מדי פעם."
-      : "צפייה בלבד: המלאי מתעדכן אוטומטית. לעריכה יש ללחוץ על «כניסה לעריכה» ולהזין סיסמה.";
+    if (note) note.textContent = "כל שינוי נשמר אוטומטית בענן ומופיע אצל כל מי שפותח את הקישור. מומלץ לייצא לאקסל גיבוי מדי פעם.";
   }
 
-  function openLogin() {
-    $("#login-err").textContent = "";
-    $("#login-pass").value = "";
-    $("#login-name").value = editorName || "";
-    openModal("login-modal");
-    setTimeout(() => $("#login-pass").focus(), 30);
+  function markEditorAsked() {
+    try { localStorage.setItem(EDITOR_ASKED_KEY, "1"); } catch (e) {}
   }
 
-  async function submitLogin() {
-    const pass = $("#login-pass").value;
-    if (!pass) return;
-    const btn = $("#login-submit");
-    btn.disabled = true;
-    $("#login-err").textContent = "בודק…";
-    let resp = null;
-    try {
-      resp = await apiPost({ action: "check", password: pass });
-    } catch (e) {
-      $("#login-err").textContent = "אין חיבור לשרת. בדקו את החיבור לאינטרנט ונסו שוב.";
-      btn.disabled = false;
-      return;
-    }
-    btn.disabled = false;
-    if (resp && resp.ok) {
-      sync.password = pass;
-      try { localStorage.setItem(AUTH_KEY, pass); } catch (e) {}
-      setEditorName($("#login-name").value);
-      closeModal("login-modal");
-      await fetchRemote(true);
-      setSyncStatus();
-      render();
-      showToast("נכנסת למצב עריכה");
-      offerLegacyUpload();
-    } else if (resp && resp.error === "not_configured") {
-      $("#login-err").textContent = "לא הוגדרה סיסמת עריכה בשרת.";
-    } else {
-      $("#login-err").textContent = "סיסמה שגויה. נסו שוב.";
-    }
+  function openNameModal(firstTime) {
+    const input = $("#editor-name-input");
+    if (!input) return;
+    input.value = editorName || "";
+    const skip = $("#name-skip");
+    if (skip) skip.textContent = firstTime ? "דילוג" : "ביטול";
+    openModal("name-modal");
+    setTimeout(() => input.focus(), 30);
   }
 
-  function logout(silent) {
-    sync.password = null;
-    histState.server = null;
-    histState.loadedAt = 0;
-    try { localStorage.removeItem(AUTH_KEY); } catch (e) {}
-    closeAllModals();
-    setSyncStatus();
-    render();
-    if (!silent) showToast("יצאת ממצב עריכה — צפייה בלבד");
+  function submitEditorName() {
+    setEditorName($("#editor-name-input").value);
+    markEditorAsked();
+    closeModal("name-modal");
+    const me = $("#hist-me");
+    if (me) me.value = editorName || "";
+    showToast(editorName ? "שינויים יירשמו בשם «" + editorName + "»" : "שינויים יירשמו ללא שם");
+  }
+
+  function skipEditorName() {
+    markEditorAsked();
+    closeModal("name-modal");
+  }
+
+  function maybeAskEditorName() {
+    if (!CLOUD) return;
+    if ($("#name-modal") && $("#name-modal").classList.contains("open")) return;
+    let asked = false;
+    try { asked = !!localStorage.getItem(EDITOR_ASKED_KEY); } catch (e) {}
+    if (asked || editorName) { markEditorAsked(); return; }
+    openNameModal(true);
+  }
+
+  function afterCloudReady() {
+    offerLegacyUpload();
+    const wait = () => {
+      if ($("#confirm-modal") && $("#confirm-modal").classList.contains("open")) setTimeout(wait, 300);
+      else maybeAskEditorName();
+    };
+    setTimeout(wait, 0);
   }
 
   function offerLegacyUpload() {
@@ -2559,20 +2532,17 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
 
   async function loadHistory(force) {
     if (!CLOUD) return;
-    if (!sync.password) { histState.error = "auth"; return; }
     if (!force && histState.server && Date.now() - histState.loadedAt < 15000) return;
     if (histState.loading) return histState.loading;
     histState.loading = (async () => {
       try {
-        const resp = await apiPost({ action: "history", password: sync.password, limit: HISTORY_LIMIT });
+        const resp = await apiPost({ action: "history", limit: HISTORY_LIMIT });
         if (resp && resp.ok && Array.isArray(resp.entries)) {
           histState.server = resp.entries;
           histState.loadedAt = Date.now();
           histState.error = "";
           const seen = new Set(resp.entries.map((e) => e.cid));
           sentHistory = sentHistory.filter((e) => !seen.has(e.cid));
-        } else if (resp && resp.error === "auth") {
-          histState.error = "auth";
         } else {
           histState.error = "old_backend";
         }
@@ -2632,7 +2602,6 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     if (!CLOUD) return "במצב מקומי ההיסטוריה נשמרת בדפדפן הזה בלבד.";
     if (histState.error === "old_backend") return "השרת עדיין לא תומך בהיסטוריה — צריך לפרסם גרסה חדשה של הסקריפט (Manage deployments → New version). השינויים עצמם נשמרים כרגיל.";
     if (histState.error === "offline") return "אין חיבור לשרת — מוצגים רק שינויים מהמכשיר הזה.";
-    if (histState.error === "auth") return "צריך להיכנס לעריכה כדי לראות היסטוריה.";
     return "מוצגים " + HISTORY_LIMIT + " השינויים האחרונים לכל היותר. ההיסטוריה המלאה נשמרת בגיליון «היסטוריה».";
   }
 
@@ -3012,7 +2981,6 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     clearTimeout(quickCacheTimer);
     quickCacheTimer = setTimeout(writeCache, 300);
     if (!CLOUD) return;
-    if (!sync.password) { fetchRemote(true); return; }
     sync.dirty = true;
     setSyncStatus();
     scheduleSave(SAVE_DEBOUNCE_MS);
@@ -4027,9 +3995,9 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       saveTheme();
       applyTheme();
     });
-    $("#btn-login").addEventListener("click", openLogin);
-    $("#btn-logout").addEventListener("click", () => logout(false));
-    $("#login-form").addEventListener("submit", (e) => { e.preventDefault(); submitLogin(); });
+    $("#btn-editor-name").addEventListener("click", () => openNameModal(false));
+    $("#name-form").addEventListener("submit", (e) => { e.preventDefault(); submitEditorName(); });
+    $("#name-skip").addEventListener("click", skipEditorName);
     $("#btn-add").addEventListener("click", () => openItemModal(null));
     $("#fab-add").addEventListener("click", () => openItemModal(null));
     $("#btn-add-cat").addEventListener("click", addCategory);
@@ -4308,14 +4276,14 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       if (window.matchMedia("(prefers-color-scheme: dark)").matches) state.settings.darkMode = true;
     }
     if (CLOUD) {
-      try { sync.password = localStorage.getItem(AUTH_KEY) || null; } catch (e) {}
+      try { localStorage.removeItem("yuvalimInventory.editPassword"); } catch (e) {}
       sync.online = true;
     }
     bind();
     setSyncStatus();
     render();
     if (CLOUD) {
-      fetchRemote(true).then(() => { if (sync.password) offerLegacyUpload(); });
+      fetchRemote(true).then(() => afterCloudReady());
       setInterval(() => { if (!document.hidden) fetchRemote(false); }, POLL_MS);
       document.addEventListener("visibilitychange", () => { if (!document.hidden) fetchRemote(false); });
       window.addEventListener("focus", () => fetchRemote(false));
