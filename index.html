@@ -781,6 +781,155 @@ table.ocr-review .ocr-del { width: 36px; padding: 0; }
   table.ocr-review td.ocr-del-cell::before { display: none; }
   .ocr-review-wrap { border: 0; max-height: none; }
 }
+
+/* fix: menu icons had no size */
+.menu-pop button svg { width: 16px; height: 16px; flex-shrink: 0; }
+/* ---- target quantity / stock status ---- */
+.dash { grid-template-columns: repeat(6, 1fr); }
+@media (max-width: 1100px) { .dash { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 860px) { .dash { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { #stat-low-card { grid-column: auto; } }
+#stat-out-card.alert .value { color: var(--danger); }
+#stat-low-card.alert .value { color: var(--warn); }
+.st-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+.st-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.st-full { color: #1F7A4D; background: rgba(45, 106, 79, 0.14); }
+.st-ok   { color: #1D5FD1; background: rgba(37, 99, 235, 0.12); }
+.st-low  { color: #C2570C; background: rgba(234, 88, 12, 0.14); }
+.st-out  { color: #C0392B; background: rgba(192, 57, 43, 0.14); }
+[data-theme="dark"] .st-full { color: #5FD39A; }
+[data-theme="dark"] .st-ok { color: #7FB0FF; }
+[data-theme="dark"] .st-low { color: #FFA45C; }
+[data-theme="dark"] .st-out { color: #FF8A7E; }
+.st-cell { display: flex; flex-direction: column; gap: 5px; min-width: 112px; }
+.st-cell .st-badge { align-self: flex-start; }
+.st-bar { height: 6px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.st-bar > span { display: block; height: 100%; border-radius: 999px; }
+.st-bar .f-full { background: #2D9D66; } .st-bar .f-ok { background: #2F6FE0; }
+.st-bar .f-low { background: #EA7A1F; } .st-bar .f-out { background: #D64534; }
+.st-pct { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+table.items tbody tr.row-low { background: rgba(234, 88, 12, 0.07); }
+table.items tbody tr.row-out { background: var(--danger-bg); }
+.item-card.row-low { border-color: rgba(234, 88, 12, 0.45); }
+.item-card.row-out { background: var(--danger-bg); border-color: #E8B4B0; }
+.item-card .st-cell { margin-top: 8px; }
+.status-select { height: 36px; border: 1px solid var(--line); border-radius: 999px; padding: 0 12px; background: var(--surface); color: var(--ink); font: inherit; font-size: 13px; font-weight: 600; }
+/* ---- shared cloud inventory: read-only / edit mode ---- */
+body.readonly .edit-only,
+body.readonly .btn-del-cat,
+body.readonly .btn-rename-cat,
+body.readonly .cat-actions,
+body.readonly .chip-del,
+body.readonly #chip-add-cat,
+body.readonly .row-actions,
+body.readonly .col-actions,
+body.readonly .qty-ctrl .qstep,
+body.readonly .sidebar-foot,
+body.readonly .fab { display: none !important; }
+body.readonly .qty-ctrl { border: 0; background: transparent; }
+body.readonly .qty-ctrl .num { pointer-events: none; border-color: transparent; background: transparent; cursor: default; }
+body:not(.readonly) .view-only { display: none !important; }
+body:not(.cloud) .cloud-only { display: none !important; }
+.sync-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px;
+  background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); white-space: nowrap;
+}
+.sync-pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.sync-pill.ok { color: var(--ok); background: var(--ok-bg); border-color: transparent; }
+.sync-pill.busy { color: var(--warn); background: var(--warn-bg); border-color: transparent; }
+.sync-pill.err { color: var(--danger); background: var(--danger-bg); border-color: transparent; }
+.login-err { color: var(--danger); font-size: 13.5px; font-weight: 600; min-height: 20px; margin-top: 8px; }
+#btn-login, #btn-logout { white-space: nowrap; }
+@media (max-width: 520px) { .sync-pill .txt { display: none; } .sync-pill { padding: 6px; } }
+
+/* ---- quick plus / minus ---- */
+.qty-ctrl { gap: 6px; }
+.qty-ctrl .qstep {
+  width: 38px; height: 38px; border-radius: 10px; font-size: 21px; line-height: 1;
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center; padding: 0;
+  touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+}
+.qty-ctrl .qstep small { font-size: 9.5px; font-weight: 700; color: var(--muted); line-height: 1; margin-top: 1px; }
+.qty-ctrl .qstep.holding { background: var(--gold-soft); border-color: var(--gold); transform: scale(0.96); }
+.qty-ctrl .num {
+  width: auto; min-width: 58px; height: 38px; padding: 0 8px; border: 1px dashed var(--line); border-radius: 10px;
+  background: var(--surface-2); color: var(--ink); font-weight: 700; font-size: 15px; font-variant-numeric: tabular-nums; cursor: pointer;
+}
+.qty-ctrl .num:hover { border-color: var(--gold); }
+@media (max-width: 860px) {
+  .qty-ctrl .qstep { width: 52px; height: 52px; font-size: 27px; border-radius: 14px; }
+  .qty-ctrl .num { height: 52px; min-width: 78px; font-size: 18px; border-radius: 14px; }
+  .item-card .bottom { gap: 10px; flex-wrap: wrap; }
+}
+.qty-ops { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.qty-ops #qty-set { grid-column: 1 / -1; }
+.qty-ops .btn { justify-content: center; min-height: 44px; }
+.qty-step-row { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+#qty-input { font-size: 22px; font-weight: 700; text-align: center; }
+
+/* ---- toolbar extras ---- */
+.chip .cnt { background: var(--danger); color: #fff; border-radius: 999px; font-size: 11px; padding: 0 6px; min-width: 18px; text-align: center; line-height: 18px; }
+.chip .cnt:empty { display: none; }
+a.btn { text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.btn[aria-disabled="true"], .btn:disabled { opacity: .45; pointer-events: none; }
+
+/* ---- order list ---- */
+.order-tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 12px; }
+.order-tools .fld { min-width: 200px; }
+.ord-group { margin-bottom: 14px; }
+.ord-group h4 { font-size: 14px; margin-bottom: 6px; display: flex; gap: 8px; align-items: baseline; }
+.ord-group h4 .g-meta { font-size: 12px; color: var(--muted); font-weight: 600; }
+.ord-line { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-bottom: 6px; background: var(--surface-2); }
+.ord-line .ol-top { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.ord-line .ol-name { font-weight: 700; }
+.ord-line .ol-sku { color: var(--muted); font-size: 12.5px; margin-inline-start: 6px; font-weight: 500; }
+.ord-line .ol-nums { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 6px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.ord-line .ol-nums b { color: var(--ink); }
+.ord-line .ol-miss b { color: var(--danger); font-size: 14.5px; }
+.ord-line .ol-cart b { color: var(--gold-ink); font-size: 14.5px; }
+.ord-empty { text-align: center; padding: 26px 10px; color: var(--muted); font-weight: 600; }
+.btn-wa { color: #128C4A; border-color: rgba(18, 140, 74, .35); }
+[data-theme="dark"] .btn-wa { color: #5FD39A; }
+
+/* ---- history ---- */
+.hist-filters { display: grid; grid-template-columns: 2fr 1.4fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.hist-me { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin: -6px 0 12px; }
+.hist-me input { border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); border-radius: 8px; padding: 5px 8px; width: 160px; }
+.hist-wrap { max-height: 52vh; overflow: auto; border: 1px solid var(--line); border-radius: 12px; }
+table.hist-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.hist-table th, .hist-table td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: right; vertical-align: top; }
+.hist-table th { position: sticky; top: 0; background: var(--surface-2); font-size: 11.5px; color: var(--muted); z-index: 1; white-space: nowrap; }
+.hist-table td.ts { white-space: nowrap; color: var(--muted); font-variant-numeric: tabular-nums; }
+.hist-table .chg { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.hist-table .chg .old { color: var(--muted); text-decoration: line-through; }
+.hist-table .chg .arr { margin: 0 4px; color: var(--muted); }
+.hist-table .chg .new { font-weight: 700; }
+.hist-table tr.pending td { opacity: .7; }
+.hist-table .item-link { background: none; border: 0; padding: 0; color: var(--gold-ink); font-weight: 650; cursor: pointer; text-align: right; }
+.hist-act { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--gold-soft); color: var(--gold-ink); white-space: nowrap; }
+.hist-act.a-delete, .hist-act.a-delete-all { background: var(--danger-bg); color: var(--danger); }
+.hist-act.a-qty { background: rgba(37, 99, 235, 0.12); color: #1D5FD1; }
+[data-theme="dark"] .hist-act.a-qty { color: #7FB0FF; }
+.hist-note { font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+.hist-note.err { color: var(--danger); font-weight: 600; }
+.item-hist { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
+.item-hist h3 { font-size: 14px; margin-bottom: 8px; }
+.item-hist ul { list-style: none; display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow: auto; }
+.item-hist li { font-size: 12.5px; background: var(--surface-2); border-radius: 8px; padding: 6px 9px; display: flex; flex-wrap: wrap; gap: 4px 10px; }
+.item-hist li .ts { color: var(--muted); font-variant-numeric: tabular-nums; }
+.item-hist .muted { color: var(--muted); font-size: 12.5px; }
+@media (max-width: 860px) {
+  .hist-filters { grid-template-columns: 1fr 1fr; }
+  .hist-filters .fld:first-child { grid-column: 1 / -1; }
+  .hist-wrap { max-height: none; border: 0; }
+  table.hist-table, .hist-table tbody, .hist-table tr, .hist-table td { display: block; width: 100%; }
+  .hist-table thead { display: none; }
+  .hist-table tr { border: 1px solid var(--line); border-radius: 12px; margin-bottom: 8px; padding: 6px 4px; background: var(--surface-2); }
+  .hist-table td { border: 0; padding: 3px 8px; }
+  .hist-table td[data-label]::before { content: attr(data-label) ": "; color: var(--muted); font-size: 11.5px; font-weight: 600; }
+  .hist-table td.ts::before { content: none; }
+}
 </style>
 </head>
 <body>
@@ -796,22 +945,27 @@ table.ocr-review .ocr-del { width: 36px; padding: 0; }
         </div>
       </div>
       <div class="header-actions">
-        <button class="btn btn-outline hide-sm" id="btn-import" type="button"></button>
-        <button class="btn btn-outline hide-sm" id="btn-import-img" type="button"></button>
+        <span class="sync-pill cloud-only" id="sync-pill" title=""><span class="txt" id="sync-text">טוען…</span></span>
+        <button class="btn btn-primary btn-sm cloud-only view-only" id="btn-login" type="button">🔒 כניסה לעריכה</button>
+        <button class="btn btn-outline hide-sm edit-only" id="btn-import" type="button"></button>
+        <button class="btn btn-outline hide-sm edit-only" id="btn-import-img" type="button"></button>
         <button class="btn btn-outline hide-sm" id="btn-export" type="button"></button>
         <button class="btn btn-outline hide-sm" id="btn-export-cat" type="button"></button>
-        <button class="btn btn-primary hide-sm" id="btn-add" type="button"></button>
+        <button class="btn btn-primary hide-sm edit-only" id="btn-add" type="button"></button>
         <div class="menu" id="more-menu">
           <button class="btn btn-icon" id="more-btn" type="button" title="עוד פעולות" aria-label="עוד פעולות"></button>
           <div class="menu-pop">
-            <button type="button" id="btn-import-m"></button>
-            <button type="button" id="btn-import-img-m"></button>
+            <button type="button" id="btn-import-m" class="edit-only"></button>
+            <button type="button" id="btn-import-img-m" class="edit-only"></button>
             <button type="button" id="btn-export-m"></button>
             <button type="button" id="btn-export-cat-m"></button>
+            <button type="button" id="btn-order-m">🛒 רשימת הזמנה</button>
+            <button type="button" id="btn-history-m" class="edit-only">🕘 היסטוריית שינויים</button>
             <button type="button" id="btn-json"></button>
-            <button type="button" id="btn-restore"></button>
-            <button type="button" id="btn-settings"></button>
-            <button type="button" id="btn-delete-all" class="danger-item"></button>
+            <button type="button" id="btn-restore" class="edit-only"></button>
+            <button type="button" id="btn-settings" class="edit-only"></button>
+            <button type="button" id="btn-delete-all" class="danger-item edit-only"></button>
+            <button type="button" id="btn-logout" class="cloud-only edit-only">🔓 יציאה ממצב עריכה</button>
           </div>
         </div>
         <button class="btn btn-icon" id="theme-btn" type="button" title="מצב תצוגה" aria-label="החלפת מצב כהה"></button>
@@ -822,7 +976,7 @@ table.ocr-review .ocr-del { width: 36px; padding: 0; }
       <aside class="sidebar">
         <div class="sidebar-head">
           <h2>קטגוריות</h2>
-          <button class="btn btn-sm btn-outline" id="btn-add-cat" type="button">+ קטגוריה</button>
+          <button class="btn btn-sm btn-outline edit-only" id="btn-add-cat" type="button">+ קטגוריה</button>
         </div>
         <div class="cat-list" id="cat-list"></div>
         <div class="sidebar-foot">
@@ -855,7 +1009,12 @@ table.ocr-review .ocr-del { width: 36px; padding: 0; }
           <article class="card stat" id="stat-low-card">
             <div class="label">מלאי נמוך</div>
             <div class="value" id="stat-low">0</div>
-            <div class="sub">מתחת לסף שהוגדר</div>
+            <div class="sub" id="stat-low-sub">מתחת ל־40% מהכמות הרצויה</div>
+          </article>
+          <article class="card stat" id="stat-out-card">
+            <div class="label">אזל מהמלאי</div>
+            <div class="value" id="stat-out">0</div>
+            <div class="sub">כמות 0</div>
           </article>
         </section>
 
@@ -866,7 +1025,16 @@ table.ocr-review .ocr-del { width: 36px; padding: 0; }
             <span></span>
             <input id="search-input" type="search" placeholder="חיפוש לפי שם, מק״ט, ספק, מיקום…" autocomplete="off" />
           </div>
-          <button class="chip" id="chip-low" type="button">מלאי נמוך</button>
+          <button class="chip" id="chip-low" type="button">הצג רק נמוכים</button>
+          <button class="chip" id="chip-order" type="button">🛒 רשימת הזמנה <span class="cnt"></span></button>
+          <button class="chip edit-only" id="chip-history" type="button">🕘 היסטוריה</button>
+          <select id="status-filter" class="status-select" aria-label="סינון לפי סטטוס">
+            <option value="">כל הסטטוסים</option>
+            <option value="full">גבוה/מלא</option>
+            <option value="ok">תקין</option>
+            <option value="low">נמוך</option>
+            <option value="out">אזל</option>
+          </select>
         </div>
 
         <div class="table-wrap" id="table-wrap">
@@ -876,9 +1044,11 @@ table.ocr-review .ocr-del { width: 36px; padding: 0; }
 
         <div class="empty" id="empty-state">
           <div class="dropzone" id="dropzone">
-            <h3>המערכת מוכנה לקלוט מלאי</h3>
-            <p>גררו לכאן קובץ אקסל, CSV או תמונה של רשימה, או בחרו קובץ. בטלפון אפשר גם לצלם את הרשימה. העמודות יזוהו אוטומטית, ואפשר לתקן לפני הייבוא.</p>
-            <div class="empty-actions">
+            <h3 class="view-only">המלאי עדיין ריק</h3>
+            <p class="view-only">עדיין לא הוזנו פריטים. מי שיש לו סיסמה יכול להיכנס לעריכה ולהוסיף מלאי.</p>
+            <h3 class="edit-only">המערכת מוכנה לקלוט מלאי</h3>
+            <p class="edit-only">גררו לכאן קובץ אקסל, CSV או תמונה של רשימה, או בחרו קובץ. בטלפון אפשר גם לצלם את הרשימה. העמודות יזוהו אוטומטית, ואפשר לתקן לפני הייבוא.</p>
+            <div class="empty-actions edit-only">
               <button class="btn btn-primary" type="button" id="empty-import">ייבוא מאקסל</button>
               <button class="btn btn-outline" type="button" id="empty-import-img">ייבוא מתמונה</button>
               <button class="btn btn-outline" type="button" id="empty-add">פריט ראשון ידנית</button>
@@ -886,7 +1056,7 @@ table.ocr-review .ocr-del { width: 36px; padding: 0; }
           </div>
         </div>
 
-        <p class="footer-note">הנתונים נשמרים אוטומטית בדפדפן זה בלבד ואינם מסונכרנים בין מכשירים. מומלץ לייצא גיבוי JSON או אקסל מדי פעם.</p>
+        <p class="footer-note" id="footer-note">הנתונים נשמרים אוטומטית בדפדפן זה בלבד ואינם מסונכרנים בין מכשירים. מומלץ לייצא גיבוי JSON או אקסל מדי פעם.</p>
       </main>
     </div>
   </div>
@@ -912,10 +1082,13 @@ table.ocr-review .ocr-del { width: 36px; padding: 0; }
           <label class="fld"><span>מחיר (₪)</span><input id="item-price" name="price" type="number" min="0" step="0.01" /></label>
           <label class="fld"><span>ספק</span><input id="item-supplier" name="supplier" /></label>
           <label class="fld"><span>מיקום</span><input id="item-location" name="location" /></label>
-          <label class="fld"><span>מלאי מינימום (ריק = ברירת מחדל)</span><input id="item-minQty" name="minQty" type="number" min="0" step="any" /></label>
+          <label class="fld"><span>כמות רצויה (יעד)</span><input id="item-targetQty" name="targetQty" type="number" min="0" step="any" placeholder="לדוגמה 20000" /></label>
+          <label class="fld"><span>קו אדום / מלאי מינימום (משמש כשאין כמות רצויה)</span><input id="item-minQty" name="minQty" type="number" min="0" step="any" /></label>
+          <label class="fld"><span>צעד לכפתורי + / − (למשל 100 לכוסות)</span><input id="item-step" name="step" type="number" min="0" step="any" placeholder="1" /></label>
           <label class="fld full"><span>הערות</span><textarea id="item-notes" name="notes"></textarea></label>
         </div>
         <div class="form-grid" id="item-custom" style="margin-top:12px"></div>
+        <div class="item-hist" id="item-history" style="display:none"></div>
         <div class="modal-actions">
           <button type="button" class="btn btn-ghost" data-close="item-modal">ביטול</button>
           <div class="right">
@@ -1018,8 +1191,9 @@ table.ocr-review .ocr-del { width: 36px; padding: 0; }
   <div class="overlay" id="settings-modal">
     <div class="modal" role="dialog" aria-modal="true">
       <h2>הגדרות</h2>
-      <p class="lead">סף מלאי נמוך משמש פריטים שלא הוגדר להם מינימום משלהם.</p>
-      <label class="fld"><span>ברירת מחדל לסף מלאי נמוך</span><input id="setting-min" type="number" min="0" step="1" /></label>
+      <p class="lead">פריט עם כמות רצויה: מלא = 100% ומעלה, תקין = מעל הסף, נמוך = מתחת לסף, אזל = 0. פריט בלי כמות רצויה נבדק לפי קו אדום / מלאי מינימום.</p>
+      <label class="fld"><span>סף מלאי נמוך (% מהכמות הרצויה)</span><input id="setting-lowpct" type="number" min="1" max="100" step="1" /></label>
+      <label class="fld" style="margin-top:10px"><span>ברירת מחדל לקו אדום (לפריטים בלי כמות רצויה ובלי מינימום)</span><input id="setting-min" type="number" min="0" step="1" /></label>
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" data-close="settings-modal">ביטול</button>
         <div class="right"><button type="button" class="btn btn-primary" id="settings-save">שמירה</button></div>
@@ -1028,6 +1202,88 @@ table.ocr-review .ocr-del { width: 36px; padding: 0; }
   </div>
 
   <!-- Confirm -->
+  <div class="overlay" id="login-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="login-title" style="max-width:420px">
+      <h2 id="login-title">כניסה לעריכה</h2>
+      <p class="lead">כדי להוסיף, לערוך, למחוק או לייבא מלאי צריך את סיסמת העריכה. הסיסמה תישמר במכשיר הזה עד שתצאו ממצב עריכה.</p>
+      <form id="login-form">
+        <label class="fld"><span>סיסמה</span><input id="login-pass" type="password" autocomplete="current-password" required /></label>
+        <label class="fld" style="margin-top:10px"><span>שם העורך (לא חובה) — יופיע בהיסטוריית השינויים</span><input id="login-name" type="text" autocomplete="nickname" maxlength="40" placeholder="לדוגמה: יעקב" /></label>
+        <div class="login-err" id="login-err" role="alert"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" data-close="login-modal">ביטול</button>
+          <div class="right"><button type="submit" class="btn btn-primary" id="login-submit">כניסה</button></div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Order list -->
+  <div class="overlay" id="order-modal">
+    <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="order-title">
+      <h2 id="order-title">🛒 רשימת הזמנה</h2>
+      <p class="lead" id="order-lead">כל הפריטים במצב נמוך או אזל, עם הכמות שחסרה עד הכמות הרצויה.</p>
+      <div class="order-tools">
+        <label class="fld"><span>קטגוריה</span><select id="order-cat"></select></label>
+      </div>
+      <div id="order-body"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-close="order-modal">סגירה</button>
+        <div class="right">
+          <button type="button" class="btn btn-outline" id="order-copy">📋 העתקה כטקסט</button>
+          <a class="btn btn-outline btn-wa" id="order-wa" href="#" target="_blank" rel="noopener">שלח בוואטסאפ</a>
+          <button type="button" class="btn btn-primary" id="order-export">ייצוא לאקסל</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="overlay" id="history-modal">
+    <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="history-title">
+      <h2 id="history-title">🕘 היסטוריית שינויים</h2>
+      <p class="lead" id="history-lead">כל שינוי במלאי נרשם: מתי, מי, באיזה פריט ומה השתנה.</p>
+      <div class="hist-me"><span>נרשם בשם:</span><input id="hist-me" type="text" maxlength="40" placeholder="ללא שם" /></div>
+      <div class="hist-filters">
+        <label class="fld"><span>חיפוש (פריט, מק״ט, עורך)</span><input id="hist-q" type="search" placeholder="חיפוש…" autocomplete="off" /></label>
+        <label class="fld"><span>פריט</span><select id="hist-item"></select></label>
+        <label class="fld"><span>פעולה</span><select id="hist-action"></select></label>
+        <label class="fld"><span>מתאריך</span><input id="hist-from" type="date" /></label>
+        <label class="fld"><span>עד תאריך</span><input id="hist-to" type="date" /></label>
+      </div>
+      <div class="hist-wrap"><table class="hist-table" id="hist-table"></table></div>
+      <div class="hist-note" id="hist-note"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-close="history-modal">סגירה</button>
+        <div class="right">
+          <button type="button" class="btn btn-outline" id="hist-refresh">רענון</button>
+          <button type="button" class="btn btn-primary" id="hist-export">ייצוא לאקסל</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick quantity -->
+  <div class="overlay" id="qty-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="qty-title" style="max-width:420px">
+      <h2 id="qty-title">עדכון כמות</h2>
+      <p class="lead" id="qty-lead"></p>
+      <input type="hidden" id="qty-id" />
+      <label class="fld"><span>כמות</span><input id="qty-input" type="number" inputmode="decimal" min="0" step="any" /></label>
+      <div class="qty-ops">
+        <button type="button" class="btn btn-primary" id="qty-set">קבע כמות מדויקת</button>
+        <button type="button" class="btn btn-outline" id="qty-add">＋ הוסף למלאי</button>
+        <button type="button" class="btn btn-outline" id="qty-sub">− הורד מהמלאי</button>
+      </div>
+      <div class="qty-step-row">
+        <label class="fld"><span>צעד לכפתורי + / − בפריט הזה</span><input id="qty-step" type="number" inputmode="decimal" min="0" step="any" placeholder="1" /></label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-close="qty-modal">סגירה</button>
+      </div>
+    </div>
+  </div>
+
   <div class="overlay" id="confirm-modal">
     <div class="modal" role="dialog" aria-modal="true">
       <h2 id="confirm-title">אישור</h2>
@@ -1072,7 +1328,21 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   <script>(function () {
   "use strict";
 
-  const STORAGE_KEY = "fwYakovInventory.v1";
+  /* ===== כתובת השרת (Google Apps Script Web App) =====
+     להדביק כאן את כתובת ה-Web App שמסתיימת ב-/exec.
+     ריק = מצב מקומי בלבד (כמו קודם: עריכה חופשית, שמירה בדפדפן בלבד). */
+  const BACKEND_URL = "https://yuvalim-inventory.yuvalim.workers.dev";
+
+  const STORAGE_KEY = "fwYakovInventory.v1";        // local cache of the shared inventory
+  const AUTH_KEY = "yuvalimInventory.editPassword"; // edit password remembered on this device
+  const THEME_KEY = "yuvalimInventory.darkMode";    // per-device theme
+  const LEGACY_KEY = "yuvalimInventory.localBeforeCloud"; // data that existed only on this device before the cloud
+  const EDITOR_KEY = "yuvalimInventory.editorName";      // optional editor name shown in the change history
+  const LOCAL_HIST_KEY = "yuvalimInventory.localHistory"; // change history when there is no backend
+  const HISTORY_LIMIT = 500;
+  const CLOUD = !!BACKEND_URL;
+  const POLL_MS = 30000;
+  const SAVE_DEBOUNCE_MS = 700;
   const UNCATEGORIZED = "ללא קטגוריה";
 
   const ROLE_DEFS = [
@@ -1084,6 +1354,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     { id: "price", label: "מחיר" },
     { id: "supplier", label: "ספק" },
     { id: "location", label: "מיקום" },
+    { id: "targetQty", label: "כמות רצויה" },
     { id: "minQty", label: "מלאי מינימום" },
     { id: "notes", label: "הערות" },
     { id: "custom", label: "שדה מותאם" }
@@ -1098,6 +1369,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     supplier: ["supplier", "vendor", "ספק", "יצרן"],
     location: ["location", "warehouse", "shelf", "place", "bin", "מיקום", "מחסן", "מדף", "מקום"],
     notes: ["notes", "note", "comments", "comment", "remarks", "description", "הערות", "הערה", "הערות נוספות", "תיאור"],
+    targetQty: ["target", "target qty", "target quantity", "desired", "desired qty", "par", "par level", "max", "כמות רצויה", "רצוי", "כמות יעד", "יעד", "מלאי רצוי", "כמות מבוקשת", "כמות מקסימום", "מלאי מלא"],
     minQty: ["min", "min qty", "minqty", "minimum", "threshold", "reorder", "min stock", "minstock", "reorder point", "red line", "redline", "מינימום", "מלאי מינימום", "כמות מינימום", "סף", "סף מלאי", "קו אדום"]
   };
 
@@ -1195,6 +1467,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     if (!n) return "skip";
     const key = headerKey(header);
     const carton = isCartonQuantityHeader(n);
+    if (/^(סטטוס|status|% מהיעד|אחוז מהיעד)$/i.test(n)) return "skip"; // our own export columns
 
     for (const [role, list] of Object.entries(ALIASES)) {
       for (const a of list) {
@@ -1322,8 +1595,9 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   const state = {
     items: [],
     categories: [],
-    settings: { darkMode: false, defaultMinQty: 5 },
+    settings: { darkMode: false, defaultMinQty: 5, lowPct: 40 },
     ui: {
+      statusFilter: "",
       selectedCategory: "__all__",
       query: "",
       lowOnly: false,
@@ -1340,6 +1614,19 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   let ocrWorker = null;
   let ocrCancelled = false;
   let persistTimer = null;
+  const sync = {
+    version: 0, updatedAt: null, password: null,
+    dirty: false, saving: false, fetching: false,
+    online: true, loadedOnce: false, cacheFromCloud: false, saveTimer: null
+  };
+  let pendingHistory = [];   // change-log entries waiting to be sent with the next save
+  let sentHistory = [];      // saved entries not yet seen in the server's history list
+  const histState = { server: null, loadedAt: 0, loading: null, error: "" };
+  let editorName = "";
+  try { editorName = localStorage.getItem(EDITOR_KEY) || ""; } catch (e) {}
+  let quickCacheTimer = null;
+  let idleRenderTimer = null;
+  let holdState = null;
 
   const TESSERACT_CDN = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
   const OCR_STATUS_HE = {
@@ -1369,27 +1656,305 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       if (!data || !Array.isArray(data.items)) return;
       state.items = data.items.map(normalizeItem);
       state.categories = Array.isArray(data.categories) ? data.categories.slice() : [];
-      state.settings = Object.assign({ darkMode: false, defaultMinQty: 5 }, data.settings || {});
+      state.settings = Object.assign({ darkMode: false, defaultMinQty: 5, lowPct: 40 }, data.settings || {});
+      sync.version = Number(data.remoteVersion || 0);
+      sync.cacheFromCloud = !!data.remoteVersion || data.fromCloud === true;
       refreshCustomCols();
       ensureCategoryList();
     } catch (e) {
       console.warn("load failed", e);
     }
+    try {
+      const t = localStorage.getItem(THEME_KEY);
+      if (t != null) state.settings.darkMode = t === "1";
+    } catch (e) {}
   }
 
-  function persist() {
+  function saveTheme() {
+    try { localStorage.setItem(THEME_KEY, state.settings.darkMode ? "1" : "0"); } catch (e) {}
+    writeCache();
+  }
+
+  function writeCache() {
     const payload = {
       version: 1,
       savedAt: new Date().toISOString(),
       items: state.items,
       categories: state.categories,
-      settings: state.settings
+      settings: state.settings,
+      remoteVersion: CLOUD ? sync.version : undefined,
+      fromCloud: CLOUD ? true : undefined
     };
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     } catch (e) {
       showToast("לא ניתן לשמור — ייתכן שהאחסון מלא");
     }
+  }
+
+  // Every data mutation calls persist(): cache locally and (in cloud mode) push to the server.
+  function persist() {
+    writeCache();
+    if (!CLOUD) return;
+    if (!sync.password) {
+      // should not happen (UI is read-only) — never push without a password
+      fetchRemote(true);
+      return;
+    }
+    sync.dirty = true;
+    setSyncStatus();
+    scheduleSave(SAVE_DEBOUNCE_MS);
+  }
+
+  /* ------------ cloud sync ------------ */
+  function sharedPayload() {
+    return {
+      items: state.items,
+      categories: state.categories,
+      settings: { defaultMinQty: state.settings.defaultMinQty, lowPct: lowPct() }
+    };
+  }
+
+  function canEdit() { return !CLOUD || !!sync.password; }
+
+  function requireEdit() {
+    if (canEdit()) return true;
+    showToast("צפייה בלבד — כדי לערוך יש ללחוץ על «כניסה לעריכה»");
+    return false;
+  }
+
+  async function apiGet() {
+    const url = BACKEND_URL + (BACKEND_URL.includes("?") ? "&" : "?") + "action=get&t=" + Date.now();
+    const res = await fetch(url, { method: "GET", cache: "no-store", redirect: "follow" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  }
+
+  async function apiPost(body) {
+    // text/plain avoids a CORS preflight, which Apps Script cannot answer
+    const res = await fetch(BACKEND_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(body),
+      redirect: "follow"
+    });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  }
+
+  function applyRemote(resp) {
+    const d = resp && resp.data;
+    sync.version = Number(resp.version || 0);
+    sync.updatedAt = resp.updatedAt || null;
+    if (d && Array.isArray(d.items)) {
+      state.items = d.items.map(normalizeItem);
+      state.categories = Array.isArray(d.categories) ? d.categories.slice() : [];
+      const min = d.settings && d.settings.defaultMinQty;
+      state.settings.defaultMinQty = min == null ? 5 : min;
+      const lp = d.settings && d.settings.lowPct;
+      state.settings.lowPct = lp == null ? 40 : lp;
+    } else {
+      state.items = [];
+      state.categories = [];
+    }
+    if (state.ui.selectedCategory !== "__all__" && !allCategoryNamesSafe().includes(state.ui.selectedCategory)) {
+      state.ui.selectedCategory = "__all__";
+    }
+    undoStack = null;
+    refreshCustomCols();
+    ensureCategoryList();
+    sync.cacheFromCloud = true;
+    writeCache();
+  }
+
+  function allCategoryNamesSafe() {
+    try { return allCategoryNames(); } catch (e) { return []; }
+  }
+
+  async function fetchRemote(force) {
+    if (!CLOUD || sync.fetching) return;
+    if (!force && (sync.dirty || sync.saving)) return;
+    sync.fetching = true;
+    try {
+      const resp = await apiGet();
+      if (!resp || !resp.ok) throw new Error("bad response");
+      sync.online = true;
+      // local edits made while we were fetching win; they will be saved / conflict-checked
+      if (!force && (sync.dirty || sync.saving)) return;
+      const remoteVersion = Number(resp.version || 0);
+      if (force || remoteVersion !== sync.version || !sync.loadedOnce) {
+        if (!sync.loadedOnce && remoteVersion === 0 && !sync.cacheFromCloud && state.items.length) {
+          // this device had a local-only inventory from before the cloud — keep it for upload
+          try { localStorage.setItem(LEGACY_KEY, JSON.stringify(sharedPayload())); } catch (e) {}
+        }
+        applyRemote(resp);
+        render();
+      }
+      sync.loadedOnce = true;
+    } catch (e) {
+      console.warn("fetch failed", e);
+      sync.online = false;
+    } finally {
+      sync.fetching = false;
+      setSyncStatus();
+    }
+  }
+
+  function scheduleSave(ms) {
+    clearTimeout(sync.saveTimer);
+    sync.saveTimer = setTimeout(saveRemote, ms);
+  }
+
+  async function saveRemote() {
+    if (!CLOUD || !sync.dirty) return;
+    if (sync.saving) { scheduleSave(400); return; }
+    if (!sync.password) return;
+    sync.saving = true;
+    sync.dirty = false;
+    setSyncStatus();
+    let resp = null;
+    const sentHist = pendingHistory.splice(0, pendingHistory.length);
+    try {
+      const body = { action: "save", password: sync.password, baseVersion: sync.version, data: sharedPayload() };
+      if (sentHist.length) body.history = sentHist;
+      resp = await apiPost(body);
+    } catch (e) {
+      pendingHistory = sentHist.concat(pendingHistory);
+      sync.saving = false;
+      sync.dirty = true;
+      sync.online = false;
+      setSyncStatus();
+      showToast("אין חיבור לשרת — השינויים יישמרו כשהחיבור יחזור");
+      scheduleSave(10000);
+      return;
+    }
+    sync.saving = false;
+    sync.online = true;
+    if (resp && resp.ok) {
+      sync.version = Number(resp.version);
+      sync.updatedAt = resp.updatedAt || null;
+      if (sentHist.length) {
+        sentHistory = sentHist.concat(sentHistory).slice(0, HISTORY_LIMIT);
+        if (resp.historySaved == null) histState.error = "old_backend";
+      }
+      writeCache();
+      if (sync.dirty) scheduleSave(SAVE_DEBOUNCE_MS);
+      refreshOpenHistoryViews();
+    } else if (resp && resp.error === "busy") {
+      pendingHistory = sentHist.concat(pendingHistory);
+      sync.dirty = true;
+      scheduleSave(1500);
+    } else if (resp && resp.error === "auth") {
+      sync.dirty = false;
+      logout(true);
+      showToast("הסיסמה שגויה או שהוחלפה — השינוי לא נשמר. יש להיכנס לעריכה מחדש.");
+      fetchRemote(true);
+    } else if (resp && resp.error === "conflict") {
+      sync.dirty = false;
+      applyRemote(resp);
+      render();
+      pendingHistory = [];
+      showToast("המלאי עודכן במקביל ממכשיר אחר. נטענה הגרסה העדכנית — יש לבצע שוב את השינוי האחרון.");
+    } else {
+      sync.dirty = false;
+      showToast("השמירה נכשלה (" + ((resp && resp.error) || "שגיאה") + "). נטען מחדש מהשרת.");
+      fetchRemote(true);
+    }
+    setSyncStatus();
+  }
+
+  function setSyncStatus() {
+    document.body.classList.toggle("cloud", CLOUD);
+    document.body.classList.toggle("readonly", !canEdit());
+    if (!CLOUD) return;
+    const pill = $("#sync-pill");
+    const txt = $("#sync-text");
+    if (!pill || !txt) return;
+    let cls = "ok", label = canEdit() ? "מצב עריכה · נשמר" : "צפייה בלבד";
+    if (sync.saving || sync.dirty) { cls = "busy"; label = "שומר…"; }
+    else if (!sync.online) { cls = "err"; label = "אין חיבור · עותק שמור"; }
+    else if (!sync.loadedOnce) { cls = "busy"; label = "טוען…"; }
+    pill.className = "sync-pill cloud-only " + cls;
+    txt.textContent = label;
+    pill.title = label + (sync.updatedAt ? " · עודכן לאחרונה " + new Date(sync.updatedAt).toLocaleString("he-IL") : "");
+    const note = $("#footer-note");
+    if (note) note.textContent = canEdit()
+      ? "מצב עריכה: כל שינוי נשמר אוטומטית בענן ומופיע אצל כל מי שפותח את הקישור. מומלץ לייצא לאקסל גיבוי מדי פעם."
+      : "צפייה בלבד: המלאי מתעדכן אוטומטית. לעריכה יש ללחוץ על «כניסה לעריכה» ולהזין סיסמה.";
+  }
+
+  function openLogin() {
+    $("#login-err").textContent = "";
+    $("#login-pass").value = "";
+    $("#login-name").value = editorName || "";
+    openModal("login-modal");
+    setTimeout(() => $("#login-pass").focus(), 30);
+  }
+
+  async function submitLogin() {
+    const pass = $("#login-pass").value;
+    if (!pass) return;
+    const btn = $("#login-submit");
+    btn.disabled = true;
+    $("#login-err").textContent = "בודק…";
+    let resp = null;
+    try {
+      resp = await apiPost({ action: "check", password: pass });
+    } catch (e) {
+      $("#login-err").textContent = "אין חיבור לשרת. בדקו את החיבור לאינטרנט ונסו שוב.";
+      btn.disabled = false;
+      return;
+    }
+    btn.disabled = false;
+    if (resp && resp.ok) {
+      sync.password = pass;
+      try { localStorage.setItem(AUTH_KEY, pass); } catch (e) {}
+      setEditorName($("#login-name").value);
+      closeModal("login-modal");
+      await fetchRemote(true);
+      setSyncStatus();
+      render();
+      showToast("נכנסת למצב עריכה");
+      offerLegacyUpload();
+    } else if (resp && resp.error === "not_configured") {
+      $("#login-err").textContent = "לא הוגדרה סיסמת עריכה בשרת.";
+    } else {
+      $("#login-err").textContent = "סיסמה שגויה. נסו שוב.";
+    }
+  }
+
+  function logout(silent) {
+    sync.password = null;
+    histState.server = null;
+    histState.loadedAt = 0;
+    try { localStorage.removeItem(AUTH_KEY); } catch (e) {}
+    closeAllModals();
+    setSyncStatus();
+    render();
+    if (!silent) showToast("יצאת ממצב עריכה — צפייה בלבד");
+  }
+
+  function offerLegacyUpload() {
+    let legacy = null;
+    try { legacy = JSON.parse(localStorage.getItem(LEGACY_KEY) || "null"); } catch (e) {}
+    if (!legacy || !Array.isArray(legacy.items) || !legacy.items.length) return;
+    if (state.items.length) { try { localStorage.removeItem(LEGACY_KEY); } catch (e) {} return; }
+    confirmModal(
+      "העלאת המלאי מהמכשיר",
+      "במכשיר הזה שמורים " + legacy.items.length + " פריטים מלפני החיבור לענן. להעלות אותם כדי שכולם יראו אותם?",
+      "העלה",
+      () => {
+        state.items = legacy.items.map(normalizeItem);
+        state.categories = Array.isArray(legacy.categories) ? legacy.categories.slice() : [];
+        refreshCustomCols();
+        ensureCategoryList();
+        try { localStorage.removeItem(LEGACY_KEY); } catch (e) {}
+        addHistory("import", { name: "מלאי מהמכשיר" }, "העלאה לענן", "0 פריטים", state.items.length + " פריטים");
+        persist();
+        render();
+        showToast("המלאי הועלה לענן");
+      }
+    );
   }
 
   function normalizeItem(it) {
@@ -1405,6 +1970,8 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       location: (it && it.location) ? String(it.location) : "",
       notes: (it && it.notes) ? String(it.notes) : "",
       minQty: it && it.minQty != null && it.minQty !== "" ? parseNumber(it.minQty) : null,
+      targetQty: it && it.targetQty != null && it.targetQty !== "" ? parseNumber(it.targetQty) : null,
+      step: (function () { const v = parseNumber(it && it.step); return v != null && v > 0 ? v : 1; })(),
       custom: custom
     };
   }
@@ -1435,8 +2002,61 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     return Number(state.settings.defaultMinQty) || 0;
   }
 
+  const STATUS_META = {
+    full: { label: "גבוה/מלא", rank: 3 },
+    ok:   { label: "תקין", rank: 2 },
+    low:  { label: "נמוך", rank: 1 },
+    out:  { label: "אזל", rank: 0 }
+  };
+
+  function lowPct() {
+    const v = Number(state.settings.lowPct);
+    return v > 0 && v <= 100 ? v : 40;
+  }
+
+  function hasTarget(it) {
+    return it.targetQty != null && !Number.isNaN(Number(it.targetQty)) && Number(it.targetQty) > 0;
+  }
+
+  // ratio of stock to target (null when no target)
+  function stockRatio(it) {
+    return hasTarget(it) ? (Number(it.quantity) || 0) / Number(it.targetQty) : null;
+  }
+
+  function statusOf(it) {
+    const q = Number(it.quantity) || 0;
+    if (q <= 0) return "out";
+    const r = stockRatio(it);
+    if (r != null) {
+      if (r >= 1) return "full";
+      if (r >= lowPct() / 100) return "ok";
+      return "low";
+    }
+    return q <= effectiveMin(it) ? "low" : "ok"; // fallback: קו אדום / minimum
+  }
+
+  // "needs attention": low or out of stock
   function isLow(it) {
-    return it.quantity <= effectiveMin(it);
+    const st = statusOf(it);
+    return st === "low" || st === "out";
+  }
+
+  function statusBadge(st) {
+    return '<span class="st-badge st-' + st + '">' + STATUS_META[st].label + "</span>";
+  }
+
+  function statusCell(it) {
+    const st = statusOf(it);
+    const r = stockRatio(it);
+    let extra;
+    if (r != null) {
+      const pct = Math.round(r * 100);
+      extra = '<div class="st-bar" title="' + pct + '% מהכמות הרצויה"><span class="f-' + st + '" style="width:' + Math.min(100, Math.max(0, pct)) + '%"></span></div>' +
+        '<span class="st-pct" dir="rtl"><bdi>' + formatNumber(it.quantity, 0) + "</bdi> מתוך <bdi>" + formatNumber(it.targetQty, 0) + "</bdi> (<bdi>" + pct + "%</bdi>)</span>";
+    } else {
+      extra = '<span class="st-pct">' + (st === "out" ? "אין במלאי" : "לפי קו אדום: " + formatNumber(effectiveMin(it), 0)) + "</span>";
+    }
+    return '<div class="st-cell">' + statusBadge(st) + extra + "</div>";
   }
 
   function categoryName(c) {
@@ -1462,13 +2082,14 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       : state.items.filter((it) => categoryName(it.category) === cat);
     const units = items.reduce((s, it) => s + (Number(it.quantity) || 0), 0);
     const value = items.reduce((s, it) => s + ((Number(it.quantity) || 0) * (Number(it.price) || 0)), 0);
-    const low = items.filter(isLow).length;
-    return { count: items.length, units, value, low };
+    const low = items.filter((it) => statusOf(it) === "low").length;
+    const out = items.filter((it) => statusOf(it) === "out").length;
+    return { count: items.length, units, value, low, out };
   }
 
   /* ------------ export ------------ */
   function itemHeaders() {
-    return ["שם", "קטגוריה", "מק״ט", "כמות", "מחיר", "ספק", "מיקום", "מלאי מינימום", "הערות"].concat(state.ui.customCols);
+    return ["שם", "קטגוריה", "מק״ט", "כמות", "כמות רצויה", "סטטוס", "מחיר", "ספק", "מיקום", "מלאי מינימום", "הערות"].concat(state.ui.customCols);
   }
 
   function itemToRow(it) {
@@ -1477,6 +2098,8 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       categoryName(it.category),
       it.sku || "",
       Number(it.quantity) || 0,
+      hasTarget(it) ? Number(it.targetQty) : "",
+      STATUS_META[statusOf(it)].label,
       it.price == null ? "" : Number(it.price),
       it.supplier || "",
       it.location || "",
@@ -1569,6 +2192,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   function importJsonFile(file) {
+    if (!requireEdit()) return;
     const reader = new FileReader();
     reader.onload = () => {
       try {
@@ -1579,9 +2203,11 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
           "השחזור יחליף את כל המלאי הנוכחי בנתונים שבקובץ. להמשיך?",
           "שחזור",
           () => {
+            const beforeCount = state.items.length;
             state.items = data.items.map(normalizeItem);
             state.categories = Array.isArray(data.categories) ? data.categories.slice() : [];
             state.settings = Object.assign(state.settings, data.settings || {});
+            addHistory("restore", { name: file.name || "גיבוי JSON" }, "שחזור מגיבוי", beforeCount + " פריטים", state.items.length + " פריטים");
             refreshCustomCols();
             ensureCategoryList();
             applyTheme();
@@ -1636,7 +2262,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
 
   function uniqueRoles(guesses) {
     const used = new Set();
-    const reserved = new Set(["name", "category", "sku", "quantity", "price", "supplier", "location", "notes", "minQty"]);
+    const reserved = new Set(["name", "category", "sku", "quantity", "price", "supplier", "location", "notes", "minQty", "targetQty"]);
     return guesses.map((g) => {
       if (!reserved.has(g)) return g;
       if (used.has(g)) return "custom";
@@ -1646,6 +2272,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   async function beginImport(file) {
+    if (!requireEdit()) return;
     try {
       const wb = await readWorkbook(file);
       const sheets = wb.SheetNames || [];
@@ -1731,6 +2358,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       location: "",
       notes: "",
       minQty: null,
+      targetQty: null,
       custom: {}
     };
     headers.forEach((h, i) => {
@@ -1738,7 +2366,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       const raw = row[i];
       const text = cellText(raw);
       if (role === "skip") return;
-      if (role === "quantity" || role === "price" || role === "minQty") {
+      if (role === "quantity" || role === "price" || role === "minQty" || role === "targetQty") {
         it[role] = parseNumber(raw != null && raw !== "" ? raw : text);
         if (role === "quantity" && it.quantity == null) it.quantity = 0;
       } else if (role === "custom") {
@@ -1754,6 +2382,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   function applyImport() {
+    if (!requireEdit()) return;
     if (!importDraft) return;
     const names = sheetsToImport(importDraft.wb);
     const usesCurrent = names.some((n) => n === importDraft.sheet || headersEqual(sheetToRows(importDraft.wb, n).headers, importDraft.headers));
@@ -1776,7 +2405,12 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   function commitImport(items, mode, matchBy) {
+    if (!requireEdit()) return;
     pushUndo();
+    const beforeCount = state.items.length;
+    const sourceName = (importDraft && importDraft.fileName) || (ocrDraft ? "ייבוא מתמונה" : "ייבוא");
+    const qtyChanges = [];
+    let added = 0;
     if (mode === "replace") {
       state.items = items;
       state.categories = [];
@@ -1790,6 +2424,8 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
         const key = matchKey(incoming, matchBy);
         const existing = key ? index.get(key) : null;
         if (existing) {
+          const oldQty = Number(existing.quantity) || 0;
+          if (oldQty !== (Number(incoming.quantity) || 0)) qtyChanges.push([existing, oldQty, Number(incoming.quantity) || 0]);
           existing.name = incoming.name || existing.name;
           existing.category = incoming.category || existing.category;
           existing.quantity = incoming.quantity;
@@ -1799,15 +2435,20 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
           existing.location = incoming.location || existing.location;
           existing.notes = incoming.notes || existing.notes;
           if (incoming.minQty != null) existing.minQty = incoming.minQty;
+          if (incoming.targetQty != null) existing.targetQty = incoming.targetQty;
           existing.custom = Object.assign({}, existing.custom, incoming.custom);
         } else {
           state.items.push(incoming);
+          added++;
           if (key) index.set(key, incoming);
         }
       }
     }
     refreshCustomCols();
     ensureCategoryList();
+    addHistory("import", { name: sourceName }, mode === "replace" ? "החלפת כל המלאי" : "מיזוג",
+      beforeCount + " פריטים", state.items.length + " פריטים" + (mode === "merge" ? " (" + added + " חדשים, " + qtyChanges.length + " כמויות עודכנו)" : ""));
+    qtyChanges.slice(0, 300).forEach((c) => addHistory("qty", c[0], "כמות (ייבוא)", c[1], c[2]));
     persist();
     closeModal("import-modal");
     closeModal("ocr-review-modal");
@@ -1829,6 +2470,428 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     return n ? "name:" + n : "";
   }
 
+  /* ------------ change history ------------ */
+  const HIST_ACTIONS = {
+    qty: "שינוי כמות", add: "הוספה", edit: "עריכה", "delete": "מחיקה", "import": "ייבוא",
+    "delete-all": "מחיקת הכל", category: "קטגוריה", settings: "הגדרות", undo: "ביטול פעולה", restore: "שחזור"
+  };
+  const FIELD_LABELS = {
+    name: "שם", category: "קטגוריה", sku: "מק״ט", quantity: "כמות", price: "מחיר", supplier: "ספק",
+    location: "מיקום", targetQty: "כמות רצויה", minQty: "קו אדום", notes: "הערות", step: "צעד + / −"
+  };
+  let localHist = null;
+  let lastQtyLog = null;
+
+  function setEditorName(v) {
+    editorName = String(v || "").trim().slice(0, 40);
+    try {
+      if (editorName) localStorage.setItem(EDITOR_KEY, editorName);
+      else localStorage.removeItem(EDITOR_KEY);
+    } catch (e) {}
+  }
+
+  function localHistory() {
+    if (!localHist) {
+      try { localHist = JSON.parse(localStorage.getItem(LOCAL_HIST_KEY) || "[]"); } catch (e) { localHist = []; }
+      if (!Array.isArray(localHist)) localHist = [];
+    }
+    return localHist;
+  }
+  function writeLocalHistory() {
+    const h = localHistory();
+    if (h.length > 2000) h.splice(0, h.length - 2000);
+    try { localStorage.setItem(LOCAL_HIST_KEY, JSON.stringify(h)); } catch (e) {}
+  }
+
+  function addHistory(action, it, field, oldV, newV) {
+    const e = {
+      cid: uid(),
+      ts: new Date().toISOString(),
+      editor: editorName || "",
+      action: action,
+      itemId: it && it.id ? String(it.id) : "",
+      item: it && it.name != null ? String(it.name) : "",
+      sku: it && it.sku ? String(it.sku) : "",
+      field: field || "",
+      old: oldV == null ? "" : String(oldV),
+      "new": newV == null ? "" : String(newV)
+    };
+    if (CLOUD) pendingHistory.push(e);
+    else { localHistory().push(e); writeLocalHistory(); }
+    return e;
+  }
+
+  // consecutive +/− taps on the same item become one entry (old → latest)
+  function logQtyChange(it, oldQ, newQ, coalesce) {
+    const now = Date.now();
+    const l = lastQtyLog;
+    if (!coalesce) { lastQtyLog = null; addHistory("qty", it, FIELD_LABELS.quantity, oldQ, newQ); return; }
+    const stillOpen = l && l.e.itemId === it.id && now - l.t < 15000 && l.e.editor === (editorName || "") &&
+      (CLOUD ? pendingHistory.includes(l.e) : localHistory().includes(l.e));
+    if (stillOpen) {
+      l.e["new"] = String(newQ);
+      l.e.ts = new Date().toISOString();
+      l.t = now;
+      if (Number(l.e.old) === newQ) {
+        const list = CLOUD ? pendingHistory : localHistory();
+        list.splice(list.indexOf(l.e), 1);
+        lastQtyLog = null;
+      }
+      if (!CLOUD) writeLocalHistory();
+      return;
+    }
+    lastQtyLog = { e: addHistory("qty", it, FIELD_LABELS.quantity, oldQ, newQ), t: now };
+  }
+
+  function logItemDiff(before, after) {
+    const keys = ["name", "category", "sku", "quantity", "targetQty", "minQty", "price", "supplier", "location", "notes", "step"];
+    const str = (v) => (v == null ? "" : String(v));
+    for (const k of keys) {
+      const a = str(before[k]), b = str(after[k]);
+      if (a !== b) addHistory(k === "quantity" ? "qty" : "edit", after, FIELD_LABELS[k], a, b);
+    }
+    const ck = new Set(Object.keys(before.custom || {}).concat(Object.keys(after.custom || {})));
+    ck.forEach((k) => {
+      const a = str((before.custom || {})[k]), b = str((after.custom || {})[k]);
+      if (a !== b) addHistory("edit", after, k, a, b);
+    });
+  }
+
+  async function loadHistory(force) {
+    if (!CLOUD) return;
+    if (!sync.password) { histState.error = "auth"; return; }
+    if (!force && histState.server && Date.now() - histState.loadedAt < 15000) return;
+    if (histState.loading) return histState.loading;
+    histState.loading = (async () => {
+      try {
+        const resp = await apiPost({ action: "history", password: sync.password, limit: HISTORY_LIMIT });
+        if (resp && resp.ok && Array.isArray(resp.entries)) {
+          histState.server = resp.entries;
+          histState.loadedAt = Date.now();
+          histState.error = "";
+          const seen = new Set(resp.entries.map((e) => e.cid));
+          sentHistory = sentHistory.filter((e) => !seen.has(e.cid));
+        } else if (resp && resp.error === "auth") {
+          histState.error = "auth";
+        } else {
+          histState.error = "old_backend";
+        }
+      } catch (e) {
+        histState.error = "offline";
+      } finally {
+        histState.loading = null;
+      }
+    })();
+    return histState.loading;
+  }
+
+  function historyEntries() {
+    let all;
+    if (!CLOUD) all = localHistory().slice();
+    else {
+      all = pendingHistory.map((e) => Object.assign({ pending: true }, e))
+        .concat(sentHistory, histState.server || []);
+    }
+    const seen = new Set();
+    const out = [];
+    for (const e of all) {
+      const k = e.cid || (e.ts + "|" + e.item + "|" + e.field + "|" + e["new"]);
+      if (seen.has(k)) continue;
+      seen.add(k);
+      out.push(e);
+    }
+    return out.sort((a, b) => String(b.ts).localeCompare(String(a.ts)));
+  }
+
+  function histTime(ts) {
+    const d = new Date(ts);
+    if (isNaN(d.getTime())) return String(ts || "");
+    return d.toLocaleString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  }
+  function histDay(ts) {
+    const d = new Date(ts);
+    if (isNaN(d.getTime())) return "";
+    const p = (x) => String(x).padStart(2, "0");
+    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+  }
+  function histVal(v) {
+    const s = v == null ? "" : String(v);
+    if (s === "") return "—";
+    if (/^-?\d+(\.\d+)?$/.test(s)) return formatNumber(Number(s));
+    return s;
+  }
+  function histActionLabel(e) { return HIST_ACTIONS[e.action] || e.actionLabel || e.action || ""; }
+  function histChangeHtml(e) {
+    const o = String(e.old == null ? "" : e.old), n = String(e["new"] == null ? "" : e["new"]);
+    if (o === "" && n === "") return "";
+    return '<span class="chg">' + (o !== "" ? '<span class="old">' + escapeHtml(histVal(o)) + '</span><span class="arr">←</span>' : "") +
+      '<span class="new">' + escapeHtml(histVal(n)) + "</span></span>";
+  }
+
+  function histNoteText() {
+    if (!CLOUD) return "במצב מקומי ההיסטוריה נשמרת בדפדפן הזה בלבד.";
+    if (histState.error === "old_backend") return "השרת עדיין לא תומך בהיסטוריה — צריך לפרסם גרסה חדשה של הסקריפט (Manage deployments → New version). השינויים עצמם נשמרים כרגיל.";
+    if (histState.error === "offline") return "אין חיבור לשרת — מוצגים רק שינויים מהמכשיר הזה.";
+    if (histState.error === "auth") return "צריך להיכנס לעריכה כדי לראות היסטוריה.";
+    return "מוצגים " + HISTORY_LIMIT + " השינויים האחרונים לכל היותר. ההיסטוריה המלאה נשמרת בגיליון «היסטוריה».";
+  }
+
+  function filteredHistory() {
+    const q = ($("#hist-q").value || "").trim().toLowerCase();
+    const item = $("#hist-item").value;
+    const act = $("#hist-action").value;
+    const from = $("#hist-from").value, to = $("#hist-to").value;
+    return historyEntries().filter((e) => {
+      if (item && (e.itemId ? "id:" + e.itemId : "name:" + e.item) !== item) return false;
+      if (act && e.action !== act) return false;
+      const day = histDay(e.ts);
+      if (from && day < from) return false;
+      if (to && day > to) return false;
+      if (q && ![e.item, e.sku, e.editor, e.field, e.old, e["new"]].join(" ").toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }
+
+  function renderHistoryFilters() {
+    const entries = historyEntries();
+    const itemSel = $("#hist-item");
+    const cur = itemSel.value;
+    const items = new Map();
+    for (const e of entries) {
+      if (!e.item) continue;
+      const k = e.itemId ? "id:" + e.itemId : "name:" + e.item;
+      if (!items.has(k)) {
+        const live = e.itemId ? state.items.find((x) => x.id === e.itemId) : null;
+        items.set(k, live ? live.name : e.item);
+      }
+    }
+    const sorted = Array.from(items.entries()).sort((a, b) => a[1].localeCompare(b[1], "he"));
+    itemSel.innerHTML = '<option value="">כל הפריטים</option>' +
+      sorted.map(([k, n]) => '<option value="' + escapeHtml(k) + '"' + (k === cur ? " selected" : "") + ">" + escapeHtml(n) + "</option>").join("");
+    if (cur && !items.has(cur)) {
+      const o = document.createElement("option"); o.value = cur; o.textContent = cur.replace(/^(id|name):/, ""); o.selected = true;
+      itemSel.appendChild(o);
+    }
+    const actSel = $("#hist-action");
+    const curA = actSel.value;
+    actSel.innerHTML = '<option value="">כל הפעולות</option>' +
+      Object.entries(HIST_ACTIONS).map(([k, l]) => '<option value="' + k + '"' + (k === curA ? " selected" : "") + ">" + l + "</option>").join("");
+  }
+
+  function renderHistoryTable() {
+    const list = filteredHistory();
+    const head = "<thead><tr><th>זמן</th><th>עורך</th><th>פעולה</th><th>פריט</th><th>שדה</th><th>שינוי</th></tr></thead>";
+    if (!list.length) {
+      $("#hist-table").innerHTML = head + '<tbody><tr><td colspan="6" class="ord-empty">' +
+        (histState.loading ? "טוען…" : "אין שינויים להצגה") + "</td></tr></tbody>";
+    } else {
+      $("#hist-table").innerHTML = head + "<tbody>" + list.map((e) =>
+        '<tr class="' + (e.pending ? "pending" : "") + '" data-cid="' + escapeHtml(e.cid || "") + '">' +
+          '<td class="ts">' + escapeHtml(histTime(e.ts)) + (e.pending ? " · ממתין לשמירה" : "") + "</td>" +
+          '<td data-label="עורך">' + escapeHtml(e.editor || "—") + "</td>" +
+          '<td data-label="פעולה"><span class="hist-act a-' + escapeHtml(e.action || "") + '">' + escapeHtml(histActionLabel(e)) + "</span></td>" +
+          '<td data-label="פריט">' + (e.item ? '<button type="button" class="item-link" data-hist-item="' + escapeHtml(e.itemId ? "id:" + e.itemId : "name:" + e.item) + '">' + escapeHtml(e.item) + "</button>" : "—") +
+            (e.sku ? ' <span class="muted">(' + escapeHtml(e.sku) + ")</span>" : "") + "</td>" +
+          '<td data-label="שדה">' + escapeHtml(e.field || "—") + "</td>" +
+          '<td data-label="שינוי">' + (histChangeHtml(e) || "—") + "</td>" +
+        "</tr>").join("") + "</tbody>";
+    }
+    const note = $("#hist-note");
+    note.textContent = list.length + " רשומות · " + histNoteText();
+    note.classList.toggle("err", histState.error === "old_backend" || histState.error === "offline");
+  }
+
+  async function openHistory(itemKey) {
+    if (!requireEdit()) return;
+    $("#hist-me").value = editorName || "";
+    if (itemKey !== undefined) {
+      $("#hist-q").value = ""; $("#hist-from").value = ""; $("#hist-to").value = ""; $("#hist-action").value = "";
+    }
+    renderHistoryFilters();
+    if (itemKey !== undefined) $("#hist-item").value = itemKey || "";
+    renderHistoryTable();
+    openModal("history-modal");
+    await loadHistory(true);
+    renderHistoryFilters();
+    if (itemKey) $("#hist-item").value = itemKey;
+    renderHistoryTable();
+  }
+
+  function exportHistory() {
+    const list = filteredHistory();
+    if (!list.length) { showToast("אין רשומות לייצוא"); return; }
+    const headers = ["זמן", "עורך", "פעולה", "פריט", "מק״ט", "שדה", "ערך קודם", "ערך חדש"];
+    const aoa = [headers].concat(list.map((e) => [histTime(e.ts), e.editor || "", histActionLabel(e), e.item || "", e.sku || "", e.field || "", e.old == null ? "" : String(e.old), e["new"] == null ? "" : String(e["new"])]));
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws["!cols"] = [{ wch: 18 }, { wch: 14 }, { wch: 12 }, { wch: 30 }, { wch: 12 }, { wch: 16 }, { wch: 18 }, { wch: 18 }];
+    ws["!views"] = [{ RTL: true, rightToLeft: true }];
+    const wb = makeWorkbook();
+    XLSX.utils.book_append_sheet(wb, ws, "היסטוריה");
+    downloadBlob(new Blob([writeXlsx(wb)], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), "malai-history-" + todayStamp() + ".xlsx");
+    showToast("ההיסטוריה יוצאה לאקסל (" + list.length + " רשומות)");
+  }
+
+  function renderItemHistory(id) {
+    const box = $("#item-history");
+    if (!box) return;
+    if (!id) { box.style.display = "none"; box.innerHTML = ""; return; }
+    const it = state.items.find((x) => x.id === id);
+    const list = historyEntries().filter((e) => e.itemId === id || (!e.itemId && it && e.item === it.name)).slice(0, 60);
+    let body;
+    if (list.length) {
+      body = "<ul>" + list.map((e) =>
+        '<li><span class="ts">' + escapeHtml(histTime(e.ts)) + "</span>" +
+        "<span>" + escapeHtml(e.editor || "—") + "</span>" +
+        '<span class="hist-act a-' + escapeHtml(e.action || "") + '">' + escapeHtml(e.field || histActionLabel(e)) + "</span>" +
+        histChangeHtml(e) + (e.pending ? ' <span class="muted">ממתין לשמירה</span>' : "") + "</li>").join("") + "</ul>";
+    } else {
+      body = '<div class="muted">' + (histState.loading ? "טוען היסטוריה…" : "אין עדיין שינויים רשומים לפריט הזה.") + "</div>";
+    }
+    const note = CLOUD && histState.error === "old_backend" ? '<div class="hist-note err">' + escapeHtml(histNoteText()) + "</div>" : "";
+    box.innerHTML = '<h3>🕘 היסטוריית הפריט</h3>' + body + note;
+    box.style.display = "";
+  }
+
+  function refreshOpenHistoryViews() {
+    if ($("#history-modal").classList.contains("open")) { renderHistoryFilters(); renderHistoryTable(); }
+    if ($("#item-modal").classList.contains("open") && $("#item-id").value) renderItemHistory($("#item-id").value);
+  }
+
+  /* ------------ order list ------------ */
+  function cartonKeyOf(it) {
+    const keys = Object.keys((it && it.custom) || {});
+    const withCarton = keys.filter((k) => headerKey(k).includes("קרטון"));
+    return withCarton.find((k) => headerKey(k).includes("להזמנה")) || withCarton[0] || null;
+  }
+
+  function orderLines(cat) {
+    const lines = [];
+    for (const it of state.items) {
+      if (!isLow(it)) continue;
+      const c = categoryName(it.category);
+      if (cat && c !== cat) continue;
+      const qty = Number(it.quantity) || 0;
+      const target = hasTarget(it) ? Number(it.targetQty) : null;
+      const goal = target != null ? target : effectiveMin(it);
+      const missing = Math.max(0, Math.round((goal - qty) * 1000) / 1000);
+      const ck = cartonKeyOf(it);
+      const perCarton = ck ? parseNumber(it.custom[ck]) : null;
+      const cartons = perCarton && perCarton > 0 && missing > 0 ? Math.ceil(missing / perCarton) : null;
+      lines.push({ it, cat: c, status: statusOf(it), qty, target, byMin: target == null, goal, missing, perCarton: perCarton > 0 ? perCarton : null, cartons });
+    }
+    const order = allCategoryNames();
+    const rank = (c) => { const i = order.indexOf(c); return i < 0 ? 9999 : i; };
+    lines.sort((a, b) => (rank(a.cat) - rank(b.cat)) || (STATUS_META[a.status].rank - STATUS_META[b.status].rank) || a.it.name.localeCompare(b.it.name, "he"));
+    return lines;
+  }
+
+  function groupLines(lines) {
+    const groups = [];
+    for (const l of lines) {
+      let g = groups[groups.length - 1];
+      if (!g || g.cat !== l.cat) { g = { cat: l.cat, lines: [] }; groups.push(g); }
+      g.lines.push(l);
+    }
+    return groups;
+  }
+
+  function orderText(lines) {
+    const d = new Date();
+    const date = d.getDate() + "." + (d.getMonth() + 1) + "." + d.getFullYear();
+    let t = "🛒 רשימת הזמנה — יובלים\n" + date + " · " + lines.length + " פריטים\n";
+    for (const g of groupLines(lines)) {
+      t += "\n*" + g.cat + "*\n";
+      for (const l of g.lines) {
+        t += "• " + l.it.name + (l.it.sku ? " (מק״ט " + l.it.sku + ")" : "") +
+          " — להזמין " + formatNumber(l.missing, 0) +
+          (l.cartons ? " = " + formatNumber(l.cartons, 0) + " קרטונים" : "") +
+          " · במלאי " + formatNumber(l.qty, 0) + (l.target != null ? " מתוך " + formatNumber(l.target, 0) : "") +
+          (l.status === "out" ? " · אזל" : "") + "\n";
+      }
+    }
+    return t.trim();
+  }
+
+  function currentOrderLines() { return orderLines($("#order-cat").value || ""); }
+
+  function renderOrder() {
+    const lines = currentOrderLines();
+    const body = $("#order-body");
+    const groups = groupLines(lines);
+    if (!lines.length) {
+      body.innerHTML = '<div class="ord-empty">אין כרגע פריטים נמוכים או שאזלו 🎉</div>';
+    } else {
+      body.innerHTML = groups.map((g) =>
+        '<section class="ord-group"><h4>' + escapeHtml(g.cat) + '<span class="g-meta">' + g.lines.length + " פריטים</span></h4>" +
+        g.lines.map((l) =>
+          '<div class="ord-line" data-id="' + escapeHtml(l.it.id) + '">' +
+            '<div class="ol-top"><div><span class="ol-name">' + escapeHtml(l.it.name) + "</span>" +
+              (l.it.sku ? '<span class="ol-sku">מק״ט ' + escapeHtml(l.it.sku) + "</span>" : "") + "</div>" + statusBadge(l.status) + "</div>" +
+            '<div class="ol-nums">' +
+              "<span>במלאי <b>" + formatNumber(l.qty, 0) + "</b></span>" +
+              "<span>" + (l.byMin ? "קו אדום" : "רצוי") + " <b>" + formatNumber(l.goal, 0) + "</b></span>" +
+              '<span class="ol-miss">חסר <b>' + formatNumber(l.missing, 0) + "</b></span>" +
+              (l.cartons ? '<span class="ol-cart">להזמין <b>' + formatNumber(l.cartons, 0) + " קרטונים</b> (" + formatNumber(l.perCarton, 0) + " בקרטון)</span>" : "") +
+            "</div></div>").join("") +
+        "</section>").join("");
+    }
+    const total = lines.length;
+    const noTarget = lines.filter((l) => l.byMin).length;
+    $("#order-lead").textContent = total
+      ? total + " פריטים להזמנה" + (noTarget ? " · ל־" + noTarget + " פריטים אין כמות רצויה, ולכן החוסר מחושב עד הקו האדום" : "") + "."
+      : "כל הפריטים מעל הסף.";
+    const wa = $("#order-wa");
+    wa.href = total ? "https://wa.me/?text=" + encodeURIComponent(orderText(lines)) : "#";
+    wa.setAttribute("aria-disabled", total ? "false" : "true");
+    $("#order-copy").disabled = !total;
+    $("#order-export").disabled = !total;
+  }
+
+  function openOrder() {
+    const sel = $("#order-cat");
+    const cats = allCategoryNames().filter((c) => state.items.some((it) => categoryName(it.category) === c && isLow(it)));
+    const pre = state.ui.selectedCategory !== "__all__" && cats.includes(state.ui.selectedCategory) ? state.ui.selectedCategory : "";
+    sel.innerHTML = '<option value="">כל הקטגוריות</option>' + cats.map((c) => '<option value="' + escapeHtml(c) + '"' + (c === pre ? " selected" : "") + ">" + escapeHtml(c) + "</option>").join("");
+    renderOrder();
+    openModal("order-modal");
+  }
+
+  function exportOrder() {
+    const lines = currentOrderLines();
+    if (!lines.length) { showToast("אין פריטים להזמנה"); return; }
+    const headers = ["קטגוריה", "שם", "מק״ט", "כמות במלאי", "כמות רצויה", "חסר", "יח׳ בקרטון", "קרטונים להזמנה", "סטטוס"];
+    const aoa = [headers];
+    for (const l of lines) {
+      aoa.push([l.cat, l.it.name, l.it.sku || "", l.qty, l.target != null ? l.target : "", l.missing, l.perCarton || "", l.cartons || "", STATUS_META[l.status].label]);
+    }
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws["!cols"] = [{ wch: 16 }, { wch: 32 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 10 }, { wch: 11 }, { wch: 15 }, { wch: 10 }];
+    ws["!views"] = [{ RTL: true, rightToLeft: true }];
+    const wb = makeWorkbook();
+    XLSX.utils.book_append_sheet(wb, ws, "רשימת הזמנה");
+    downloadBlob(new Blob([writeXlsx(wb)], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), "hazmana-" + todayStamp() + ".xlsx");
+    showToast("רשימת ההזמנה יוצאה לאקסל");
+  }
+
+  async function copyText(text) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); return true; }
+    } catch (e) {}
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    let ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) {}
+    ta.remove();
+    return ok;
+  }
+
+  function updateOrderCount() {
+    const n = state.items.filter(isLow).length;
+    const el = $("#chip-order .cnt");
+    if (el) el.textContent = n ? String(n) : "";
+  }
+
   /* ------------ mutations ------------ */
   function pushUndo() {
     undoStack = {
@@ -1838,11 +2901,13 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   function undo() {
+    if (!requireEdit()) return;
     if (!undoStack) return;
     state.items = undoStack.items;
     state.categories = undoStack.categories;
     undoStack = null;
     refreshCustomCols();
+    addHistory("undo", null, "ביטול הפעולה האחרונה", "", state.items.length + " פריטים");
     persist();
     render();
     showToast("הפעולה בוטלה");
@@ -1850,6 +2915,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   function addCategory() {
+    if (!requireEdit()) return;
     const name = prompt("שם הקטגוריה החדשה:");
     if (name == null) return;
     const c = name.trim();
@@ -1860,11 +2926,13 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     }
     state.categories.push(c);
     state.ui.selectedCategory = c;
+    addHistory("category", { name: c }, "קטגוריה חדשה", "", c);
     persist();
     render();
   }
 
   function renameCategory(oldName) {
+    if (!requireEdit()) return;
     const name = prompt("שם חדש לקטגוריה:", oldName);
     if (name == null) return;
     const c = name.trim();
@@ -1879,11 +2947,13 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       if (categoryName(it.category) === oldName) it.category = c;
     }
     if (state.ui.selectedCategory === oldName) state.ui.selectedCategory = c;
+    addHistory("category", { name: c }, "שינוי שם קטגוריה", oldName, c);
     persist();
     render();
   }
 
   function deleteCategory(name) {
+    if (!requireEdit()) return;
     if (!name || name === "__all__") return;
     const count = state.items.filter((it) => categoryName(it.category) === name).length;
     const msg = count
@@ -1894,6 +2964,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       state.categories = state.categories.filter((c) => c !== name);
       state.items = state.items.filter((it) => categoryName(it.category) !== name);
       if (state.ui.selectedCategory === name) state.ui.selectedCategory = "__all__";
+      addHistory("delete", { name: "קטגוריה «" + name + "»" }, "מחיקת קטגוריה", count + " פריטים", "נמחקה");
       persist();
       render();
       showToast(count ? ("נמחקה הקטגוריה «" + name + "» ו־" + count + " פריטים") : ("הקטגוריה «" + name + "» נמחקה"), true);
@@ -1901,6 +2972,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   function deleteAll() {
+    if (!requireEdit()) return;
     const count = state.items.length;
     const catCount = state.categories.length;
     if (!count && !catCount) {
@@ -1922,24 +2994,141 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       state.ui.lowOnly = false;
       state.ui.customCols = [];
       try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      addHistory("delete-all", { name: "כל המלאי" }, "מחיקת הכל", count + " פריטים, " + catCount + " קטגוריות", "0");
       persist();
       render();
       showToast(count ? ("נמחקו כל " + count + " הפריטים") : "כל הקטגוריות נמחקו", true);
     }, { danger: true });
   }
 
+  /* ---- quick plus / minus ---- */
+  function stepOf(it) {
+    const s = Number(it && it.step);
+    return s > 0 ? s : 1;
+  }
+
+  // light-weight persist for rapid taps: cloud save is debounced (SAVE_DEBOUNCE_MS), local cache write too
+  function persistQuick() {
+    clearTimeout(quickCacheTimer);
+    quickCacheTimer = setTimeout(writeCache, 300);
+    if (!CLOUD) return;
+    if (!sync.password) { fetchRemote(true); return; }
+    sync.dirty = true;
+    setSyncStatus();
+    scheduleSave(SAVE_DEBOUNCE_MS);
+  }
+
+  function setQty(it, next, quick) {
+    const old = Number(it.quantity) || 0;
+    next = Math.max(0, Math.round((Number(next) || 0) * 1000) / 1000);
+    if (next === old) return false;
+    it.quantity = next;
+    logQtyChange(it, old, next, quick);
+    if (quick) {
+      persistQuick();
+      updateItemDom(it);
+      renderDashboard();
+      updateOrderCount();
+      scheduleIdleRender();
+    } else {
+      persist();
+      render();
+    }
+    return true;
+  }
+
+  function quickStep(id, sign) {
+    if (!requireEdit()) return false;
+    const it = state.items.find((x) => x.id === id);
+    if (!it) return false;
+    return setQty(it, (Number(it.quantity) || 0) + sign * stepOf(it), true);
+  }
+
   function changeQty(id, delta) {
+    if (!requireEdit()) return;
     const it = state.items.find((x) => x.id === id);
     if (!it) return;
-    const next = Math.max(0, (Number(it.quantity) || 0) + delta);
-    it.quantity = next;
+    setQty(it, (Number(it.quantity) || 0) + delta, false);
+  }
+
+  // update one item's rows/cards in place (keeps the pressed button alive during long-press)
+  function updateItemDom(it) {
+    const st = statusOf(it);
+    $$("tr[data-id], .item-card[data-id]").filter((el) => el.dataset.id === it.id).forEach((el) => {
+      el.classList.remove("row-full", "row-ok", "row-low", "row-out");
+      el.classList.add("row-" + st);
+      el.dataset.status = st;
+      const num = el.querySelector(".qty-ctrl .num");
+      if (num) num.textContent = formatNumber(it.quantity, 0);
+      const sc = el.querySelector(".st-cell");
+      if (sc) sc.outerHTML = statusCell(it);
+    });
+  }
+
+  function scheduleIdleRender() {
+    clearTimeout(idleRenderTimer);
+    idleRenderTimer = setTimeout(() => {
+      if (holdState) { scheduleIdleRender(); return; }
+      renderSidebar();
+      renderTable();
+    }, 1200);
+  }
+
+  function openQtyModal(id) {
+    if (!requireEdit()) return;
+    const it = state.items.find((x) => x.id === id);
+    if (!it) return;
+    $("#qty-id").value = id;
+    $("#qty-title").textContent = it.name || "עדכון כמות";
+    renderQtyLead(it);
+    $("#qty-input").value = "";
+    $("#qty-input").placeholder = formatNumber(it.quantity, 0);
+    $("#qty-step").value = stepOf(it);
+    openModal("qty-modal");
+    setTimeout(() => $("#qty-input").focus(), 30);
+  }
+
+  function renderQtyLead(it) {
+    $("#qty-lead").innerHTML = "במלאי כעת: <b>" + formatNumber(it.quantity, 0) + "</b>" +
+      (hasTarget(it) ? " · כמות רצויה: <b>" + formatNumber(it.targetQty, 0) + "</b>" : "") +
+      " · " + statusBadge(statusOf(it));
+  }
+
+  function saveStepFromQtyModal(it) {
+    const v = parseNumber($("#qty-step").value);
+    if (v == null || v <= 0 || v === stepOf(it)) return;
+    const old = stepOf(it);
+    it.step = v;
+    addHistory("edit", it, FIELD_LABELS.step, old, v);
     persist();
     render();
   }
 
+  function applyQtyModal(op) {
+    if (!requireEdit()) return;
+    const it = state.items.find((x) => x.id === $("#qty-id").value);
+    if (!it) { closeModal("qty-modal"); return; }
+    saveStepFromQtyModal(it);
+    const raw = $("#qty-input").value;
+    const v = parseNumber(raw);
+    if (v == null || v < 0) {
+      if (raw === "" && op !== "set") { closeModal("qty-modal"); return; }
+      showToast("יש להקליד מספר");
+      $("#qty-input").focus();
+      return;
+    }
+    const old = Number(it.quantity) || 0;
+    const next = op === "add" ? old + v : op === "sub" ? old - v : v;
+    closeModal("qty-modal");
+    if (setQty(it, next, false)) showToast("«" + it.name + "»: " + formatNumber(old, 0) + " ← " + formatNumber(it.quantity, 0));
+  }
+
   function saveItemFromForm(id) {
+    if (!requireEdit()) return;
     const form = $("#item-form");
     const data = Object.fromEntries(new FormData(form).entries());
+    const before = id ? state.items.find((x) => x.id === id) : null;
+    const beforeCopy = before ? deepClone(before) : null;
     const item = normalizeItem({
       id: id || uid(),
       name: data.name,
@@ -1951,6 +3140,8 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       location: data.location,
       notes: data.notes,
       minQty: data.minQty === "" ? null : data.minQty,
+      targetQty: data.targetQty === "" ? null : data.targetQty,
+      step: data.step,
       custom: {}
     });
     if (!item.name.trim()) { showToast("יש למלא שם פריט"); return; }
@@ -1962,8 +3153,10 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     if (id) {
       const idx = state.items.findIndex((x) => x.id === id);
       if (idx >= 0) state.items[idx] = item;
+      if (beforeCopy) logItemDiff(beforeCopy, item);
     } else {
       state.items.push(item);
+      addHistory("add", item, "פריט חדש", "", "כמות " + (Number(item.quantity) || 0));
     }
     refreshCustomCols();
     persist();
@@ -1972,11 +3165,13 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   function deleteItem(id) {
+    if (!requireEdit()) return;
     const it = state.items.find((x) => x.id === id);
     if (!it) return;
     confirmModal("מחיקת פריט", "למחוק את «" + it.name + "» מהמלאי?", "מחק", () => {
       pushUndo();
       state.items = state.items.filter((x) => x.id !== id);
+      addHistory("delete", it, "מחיקת פריט", "כמות " + (Number(it.quantity) || 0), "נמחק");
       persist();
       render();
       showToast("הפריט נמחק", true);
@@ -1996,11 +3191,12 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     let list = state.items;
     if (sel !== "__all__") list = list.filter((it) => categoryName(it.category) === sel);
     if (state.ui.lowOnly) list = list.filter(isLow);
+    if (state.ui.statusFilter) list = list.filter((it) => statusOf(it) === state.ui.statusFilter);
     if (q) {
       list = list.filter((it) => {
         const blob = [
           it.name, it.category, it.sku, it.supplier, it.location, it.notes,
-          it.quantity, it.price, it.minQty,
+          it.quantity, it.price, it.minQty, it.targetQty, STATUS_META[statusOf(it)].label,
           it.custom ? Object.values(it.custom).join(" ") : ""
         ].join(" ").toLowerCase();
         return blob.includes(q);
@@ -2012,6 +3208,11 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       if (key === "value") return (Number(it.quantity) || 0) * (Number(it.price) || 0);
       if (key === "category") return categoryName(it.category);
       if (key === "minQty") return effectiveMin(it);
+      if (key === "status") {
+        const r = stockRatio(it);
+        return STATUS_META[statusOf(it)].rank * 1000 + (r == null ? 0.5 : Math.min(r, 9.99)); // rank, then fill ratio
+      }
+      if (key === "targetQty") return hasTarget(it) ? Number(it.targetQty) : -Infinity;
       const v = it[key];
       if (v == null) return key === "quantity" || key === "price" ? -Infinity : "";
       return v;
@@ -2033,6 +3234,9 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     $("#stat-cats").textContent = formatNumber(catCount, 0);
     $("#stat-low").textContent = formatNumber(all.low, 0);
     $("#stat-low-card").classList.toggle("alert", all.low > 0);
+    $("#stat-out").textContent = formatNumber(all.out, 0);
+    $("#stat-out-card").classList.toggle("alert", all.out > 0);
+    $("#stat-low-sub").textContent = "מתחת ל־" + lowPct() + "% מהכמות הרצויה";
   }
 
   function renderSidebar() {
@@ -2129,16 +3333,18 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       (state.ui.selectedCategory === "__all__" ? th("category", "קטגוריה") : "") +
       th("sku", "מק״ט") +
       th("quantity", "כמות") +
+      th("targetQty", "כמות רצויה") +
+      th("status", "סטטוס") +
       th("price", "מחיר") +
       th("value", "שווי") +
       th("supplier", "ספק") +
       th("location", "מיקום") +
       custom.map((k) => th("custom:" + k, k)).join("") +
-      "<th>פעולות</th></tr></thead>";
+      '<th class="col-actions">פעולות</th></tr></thead>';
 
     const group = state.ui.selectedCategory === "__all__";
     let body = "<tbody>";
-    const colSpan = 8 + custom.length + (state.ui.selectedCategory === "__all__" ? 1 : 0);
+    const colSpan = 10 + custom.length + (state.ui.selectedCategory === "__all__" ? 1 : 0);
     function appendGroup(c, items) {
       if (!items.length) return;
       if (group) {
@@ -2199,21 +3405,26 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   function qtyCtrl(it) {
+    const s = stepOf(it);
+    const sm = s !== 1 ? "<small>" + formatNumber(s) + "</small>" : "";
+    const id = escapeHtml(it.id);
     return '<div class="qty-ctrl">' +
-      '<button type="button" data-act="dec" data-id="' + it.id + '" aria-label="הפחתה">−</button>' +
-      '<span class="num">' + formatNumber(it.quantity, 0) + "</span>" +
-      '<button type="button" data-act="inc" data-id="' + it.id + '" aria-label="העלאה">+</button>' +
+      '<button type="button" class="qstep" data-act="dec" data-id="' + id + '" aria-label="הפחתה של ' + s + '" title="לחיצה ארוכה = חזרה">−' + sm + "</button>" +
+      '<button type="button" class="num" data-qnum="' + id + '" title="הקלדת כמות מדויקת" aria-label="כמות ' + formatNumber(it.quantity, 0) + ' — לחצו להקלדה">' + formatNumber(it.quantity, 0) + "</button>" +
+      '<button type="button" class="qstep" data-act="inc" data-id="' + id + '" aria-label="הוספה של ' + s + '" title="לחיצה ארוכה = חזרה">+' + sm + "</button>" +
     "</div>";
   }
 
   function renderRow(it, custom) {
-    const low = isLow(it);
+    const st = statusOf(it);
     const value = (Number(it.quantity) || 0) * (Number(it.price) || 0);
-    return '<tr class="' + (low ? "low" : "") + '" data-id="' + it.id + '">' +
-      '<td class="name">' + (low ? '<span class="low-tag">מלאי נמוך</span>' : "") + escapeHtml(it.name) + "</td>" +
+    return '<tr class="row-' + st + '" data-id="' + it.id + '" data-status="' + st + '">' +
+      '<td class="name">' + escapeHtml(it.name) + "</td>" +
       (state.ui.selectedCategory === "__all__" ? "<td><span class=\"badge\">" + escapeHtml(categoryName(it.category)) + "</span></td>" : "") +
       '<td class="sku muted">' + escapeHtml(it.sku || "—") + "</td>" +
       "<td>" + qtyCtrl(it) + "</td>" +
+      '<td class="muted">' + (hasTarget(it) ? formatNumber(it.targetQty, 0) : "—") + "</td>" +
+      "<td>" + statusCell(it) + "</td>" +
       "<td>" + formatMoney(it.price) + "</td>" +
       "<td>" + (it.price == null ? "—" : formatMoney(value)) + "</td>" +
       '<td class="muted">' + escapeHtml(it.supplier || "—") + "</td>" +
@@ -2226,16 +3437,16 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   function renderCard(it) {
-    const low = isLow(it);
-    return '<article class="item-card' + (low ? " low" : "") + '">' +
-      '<div class="top"><h3>' + (low ? '<span class="low-tag">מלאי נמוך</span> ' : "") + escapeHtml(it.name) + "</h3>" +
+    const st = statusOf(it);
+    return '<article class="item-card row-' + st + '" data-id="' + it.id + '" data-status="' + st + '">' +
+      '<div class="top"><h3>' + escapeHtml(it.name) + "</h3>" +
       '<span class="badge">' + escapeHtml(categoryName(it.category)) + "</span></div>" +
       '<div class="meta">' +
         (it.sku ? "<span>מק״ט " + escapeHtml(it.sku) + "</span>" : "") +
         "<span>" + formatMoney(it.price) + "</span>" +
         (it.location ? "<span>" + escapeHtml(it.location) + "</span>" : "") +
         (it.supplier ? "<span>" + escapeHtml(it.supplier) + "</span>" : "") +
-      "</div>" +
+      "</div>" + statusCell(it) +
       '<div class="bottom">' + qtyCtrl(it) +
         '<div class="row-actions">' +
           '<button class="btn btn-icon" data-act="edit" data-id="' + it.id + '" title="עריכה" aria-label="עריכת «' + escapeHtml(it.name) + '»">' + ICONS.edit + "</button>" +
@@ -2275,6 +3486,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   function openItemModal(id) {
+    if (!requireEdit()) return;
     const it = id ? state.items.find((x) => x.id === id) : null;
     $("#item-modal-title").textContent = it ? "עריכת פריט" : "פריט חדש";
     $("#item-id").value = it ? it.id : "";
@@ -2291,6 +3503,8 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     $("#item-supplier").value = it ? it.supplier : "";
     $("#item-location").value = it ? it.location : "";
     $("#item-minQty").value = it && it.minQty != null ? it.minQty : "";
+    $("#item-targetQty").value = it && it.targetQty != null ? it.targetQty : "";
+    $("#item-step").value = it ? stepOf(it) : "";
     $("#item-notes").value = it ? it.notes : "";
     const extras = $("#item-custom");
     const keys = new Set(state.ui.customCols);
@@ -2299,6 +3513,8 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       '<label class="fld"><span>' + escapeHtml(k) + '</span><input class="custom-input" data-key="' + escapeHtml(k) + '" value="' + escapeHtml((it && it.custom && it.custom[k]) || "") + '"></label>'
     ).join("");
     openModal("item-modal");
+    renderItemHistory(it ? it.id : null);
+    if (it && CLOUD) loadHistory(false).then(() => { if ($("#item-id").value === it.id && $("#item-modal").classList.contains("open")) renderItemHistory(it.id); });
     setTimeout(() => $("#item-name").focus(), 30);
   }
 
@@ -2308,6 +3524,9 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     renderSidebar();
     renderTable();
     $("#chip-low").classList.toggle("active", state.ui.lowOnly);
+    $("#status-filter").value = state.ui.statusFilter || "";
+    updateOrderCount();
+    if ($("#order-modal").classList.contains("open")) renderOrder();
     $("#search-input").value = state.ui.query;
   }
 
@@ -2589,11 +3808,13 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   function pickOcrFile() {
+    if (!requireEdit()) return;
     const input = $("#file-image");
     if (input) input.click();
   }
 
   async function beginImageImport(file) {
+    if (!requireEdit()) return;
     if (!file) return;
     ocrCancelled = false;
     setOcrProgress(0, "מתחיל לטעון את מנוע הזיהוי…");
@@ -2751,6 +3972,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   function applyOcrImport() {
+    if (!requireEdit()) return;
     if (!ocrDraft) return;
     // flush any unsynced fields
     $$("#ocr-review-table [data-ocr-field]").forEach(syncOcrRowFromField);
@@ -2802,9 +4024,12 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     setChrome();
     $("#theme-btn").addEventListener("click", () => {
       state.settings.darkMode = !state.settings.darkMode;
-      persist();
+      saveTheme();
       applyTheme();
     });
+    $("#btn-login").addEventListener("click", openLogin);
+    $("#btn-logout").addEventListener("click", () => logout(false));
+    $("#login-form").addEventListener("submit", (e) => { e.preventDefault(); submitLogin(); });
     $("#btn-add").addEventListener("click", () => openItemModal(null));
     $("#fab-add").addEventListener("click", () => openItemModal(null));
     $("#btn-add-cat").addEventListener("click", addCategory);
@@ -2860,7 +4085,13 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       state.ui.query = e.target.value;
       renderTable();
     });
+    $("#status-filter").addEventListener("change", (e) => {
+      state.ui.statusFilter = e.target.value;
+      if (state.ui.statusFilter) state.ui.lowOnly = false;
+      render();
+    });
     $("#chip-low").addEventListener("click", () => {
+      state.ui.statusFilter = "";
       state.ui.lowOnly = !state.ui.lowOnly;
       render();
     });
@@ -2868,12 +4099,20 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     $("#btn-delete-all").addEventListener("click", deleteAll);
     $("#btn-delete-all-side").addEventListener("click", deleteAll);
     $("#btn-settings").addEventListener("click", () => {
+      if (!requireEdit()) return;
       $("#setting-min").value = state.settings.defaultMinQty;
+      $("#setting-lowpct").value = lowPct();
       openModal("settings-modal");
     });
     $("#settings-save").addEventListener("click", () => {
+      if (!requireEdit()) return;
+      const oldMin = state.settings.defaultMinQty, oldPct = lowPct();
       const n = parseNumber($("#setting-min").value);
       state.settings.defaultMinQty = n == null ? 5 : n;
+      const lp = parseNumber($("#setting-lowpct").value);
+      state.settings.lowPct = lp != null && lp > 0 && lp <= 100 ? lp : 40;
+      if (oldPct !== lowPct()) addHistory("settings", { name: "הגדרות" }, "סף מלאי נמוך (%)", oldPct, lowPct());
+      if (String(oldMin) !== String(state.settings.defaultMinQty)) addHistory("settings", { name: "הגדרות" }, "ברירת מחדל לקו אדום", oldMin, state.settings.defaultMinQty);
       persist();
       closeModal("settings-modal");
       render();
@@ -2902,11 +4141,15 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       if (ren) { e.preventDefault(); renameCategory(ren.dataset.cat); return; }
       const delCat = e.target.closest(".btn-del-cat");
       if (delCat) { e.preventDefault(); deleteCategory(delCat.dataset.cat); return; }
+      const qn = e.target.closest("[data-qnum]");
+      if (qn) { e.preventDefault(); openQtyModal(qn.dataset.qnum); return; }
+      const hi = e.target.closest("[data-hist-item]");
+      if (hi) { $("#hist-item").value = hi.dataset.histItem; renderHistoryTable(); return; }
       const act = e.target.closest("[data-act]");
       if (!act) return;
       const id = act.dataset.id;
-      if (act.dataset.act === "inc") changeQty(id, 1);
-      if (act.dataset.act === "dec") changeQty(id, -1);
+      // pointer presses are handled on pointerdown (with long-press repeat); keyboard activation lands here (detail 0)
+      if ((act.dataset.act === "inc" || act.dataset.act === "dec") && e.detail === 0) quickStep(id, act.dataset.act === "inc" ? 1 : -1);
       if (act.dataset.act === "edit") openItemModal(id);
       if (act.dataset.act === "del") deleteItem(id);
     });
@@ -2951,6 +4194,72 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
 
     $("#toast-undo").addEventListener("click", undo);
 
+    // quick +/−: press = one step, hold = repeat (accelerates)
+    const stopHold = () => {
+      if (!holdState) return;
+      clearTimeout(holdState.t);
+      clearInterval(holdState.i);
+      holdState.btn.classList.remove("holding");
+      holdState = null;
+      scheduleIdleRender();
+    };
+    document.addEventListener("pointerdown", (e) => {
+      const b = e.target.closest('.qty-ctrl [data-act="inc"], .qty-ctrl [data-act="dec"]');
+      if (!b) return;
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      stopHold();
+      const id = b.dataset.id;
+      const sign = b.dataset.act === "inc" ? 1 : -1;
+      if (!quickStep(id, sign)) return;
+      b.classList.add("holding");
+      const h = { btn: b, n: 0, t: null, i: null };
+      holdState = h;
+      h.t = setTimeout(() => {
+        const tick = () => {
+          if (holdState !== h) return;
+          h.n++;
+          if (!quickStep(id, sign)) { stopHold(); return; }
+          if (h.n === 12) { clearInterval(h.i); h.i = setInterval(tick, 50); }
+        };
+        h.i = setInterval(tick, 110);
+      }, 450);
+    });
+    ["pointerup", "pointercancel", "blur"].forEach((ev) => window.addEventListener(ev, stopHold));
+    document.addEventListener("pointerout", (e) => { if (holdState && e.target === holdState.btn && !holdState.btn.contains(e.relatedTarget)) stopHold(); });
+    document.addEventListener("contextmenu", (e) => { if (e.target.closest(".qty-ctrl")) e.preventDefault(); });
+
+    // quick quantity modal
+    $("#qty-set").addEventListener("click", () => applyQtyModal("set"));
+    $("#qty-add").addEventListener("click", () => applyQtyModal("add"));
+    $("#qty-sub").addEventListener("click", () => applyQtyModal("sub"));
+    $("#qty-input").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); applyQtyModal("set"); } });
+    $("#qty-step").addEventListener("change", () => {
+      const it = state.items.find((x) => x.id === $("#qty-id").value);
+      if (it && requireEdit()) { saveStepFromQtyModal(it); renderQtyLead(it); }
+    });
+
+    // order list
+    $("#chip-order").addEventListener("click", openOrder);
+    $("#btn-order-m").addEventListener("click", openOrder);
+    $("#order-cat").addEventListener("change", renderOrder);
+    $("#order-export").addEventListener("click", exportOrder);
+    $("#order-copy").addEventListener("click", async () => {
+      const lines = currentOrderLines();
+      if (!lines.length) return;
+      const ok = await copyText(orderText(lines));
+      showToast(ok ? "הרשימה הועתקה — אפשר להדביק בכל מקום" : "ההעתקה נכשלה");
+    });
+    $("#order-wa").addEventListener("click", (e) => { if (!currentOrderLines().length) e.preventDefault(); });
+
+    // history
+    $("#chip-history").addEventListener("click", () => openHistory(""));
+    $("#btn-history-m").addEventListener("click", () => openHistory(""));
+    ["#hist-q", "#hist-from", "#hist-to"].forEach((s) => $(s).addEventListener("input", renderHistoryTable));
+    ["#hist-item", "#hist-action", "#hist-from", "#hist-to"].forEach((s) => $(s).addEventListener("change", renderHistoryTable));
+    $("#hist-export").addEventListener("click", exportHistory);
+    $("#hist-refresh").addEventListener("click", async () => { renderHistoryTable(); await loadHistory(true); renderHistoryFilters(); renderHistoryTable(); });
+    $("#hist-me").addEventListener("change", (e) => { setEditorName(e.target.value); e.target.value = editorName; showToast(editorName ? "שינויים יירשמו בשם «" + editorName + "»" : "שינויים יירשמו ללא שם"); });
+
     $$("[data-close]").forEach((btn) => {
       btn.addEventListener("click", () => closeModal(btn.dataset.close));
     });
@@ -2983,22 +4292,38 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       const files = e.dataTransfer && e.dataTransfer.files;
       if (!files || !files.length) return;
       e.preventDefault();
+      if (!requireEdit()) return;
       const f = files[0];
       const n = (f.name || "").toLowerCase();
       if (n.endsWith(".json") || (f.type || "") === "application/json") importJsonFile(f);
       else if (isImageFile(f)) beginImageImport(f);
       else beginImport(f);
     });
-    dz.addEventListener("click", () => $("#file-excel").click());
+    dz.addEventListener("click", () => { if (canEdit()) $("#file-excel").click(); });
   }
 
   function init() {
     load();
-    if (typeof window !== "undefined" && window.matchMedia && !localStorage.getItem(STORAGE_KEY)) {
+    if (typeof window !== "undefined" && window.matchMedia && !localStorage.getItem(STORAGE_KEY) && localStorage.getItem(THEME_KEY) == null) {
       if (window.matchMedia("(prefers-color-scheme: dark)").matches) state.settings.darkMode = true;
     }
+    if (CLOUD) {
+      try { sync.password = localStorage.getItem(AUTH_KEY) || null; } catch (e) {}
+      sync.online = true;
+    }
     bind();
+    setSyncStatus();
     render();
+    if (CLOUD) {
+      fetchRemote(true).then(() => { if (sync.password) offerLegacyUpload(); });
+      setInterval(() => { if (!document.hidden) fetchRemote(false); }, POLL_MS);
+      document.addEventListener("visibilitychange", () => { if (!document.hidden) fetchRemote(false); });
+      window.addEventListener("focus", () => fetchRemote(false));
+      window.addEventListener("online", () => { if (sync.dirty) scheduleSave(0); else fetchRemote(false); });
+      window.addEventListener("beforeunload", (e) => {
+        if (sync.dirty || sync.saving) { e.preventDefault(); e.returnValue = ""; }
+      });
+    }
   }
 
   document.addEventListener("DOMContentLoaded", init);
