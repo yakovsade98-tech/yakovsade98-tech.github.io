@@ -1091,14 +1091,14 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
 
   const ALIASES = {
     name: ["name", "item", "product", "item name", "product name", "itemname", "productname", "שם", "פריט", "מוצר", "שם פריט", "שם המוצר", "שם מוצר"],
-    category: ["category", "type", "group", "קטגוריה", "סוג", "קבוצה", "מחלקה"],
-    quantity: ["quantity", "qty", "stock", "amount", "count", "units", "on hand", "כמות", "מלאי", "יחידות", "מלאי נוכחי", "כמות במלאי"],
+    category: ["category", "type", "group", "קטגוריה", "סוג", "קבוצה", "מחלקה", "מכלול", "מכולה", "סככה", "סככות"],
+    quantity: ["quantity", "qty", "stock", "amount", "count", "units", "on hand", "כמות", "מלאי", "יחידות", "מלאי נוכחי", "כמות במלאי", "יתרת מלאי", "יתרה"],
     price: ["price", "cost", "unit price", "unitprice", "מחיר", "עלות", "מחיר יחידה", "מחיר ליחידה"],
     sku: ["sku", "barcode", "code", "item code", "itemcode", "מקט", "מק\"ט", "מק״ט", "ברקוד", "קוד", "קוד פריט", "מספר מקט"],
     supplier: ["supplier", "vendor", "ספק", "יצרן"],
     location: ["location", "warehouse", "shelf", "place", "bin", "מיקום", "מחסן", "מדף", "מקום"],
     notes: ["notes", "note", "comments", "comment", "remarks", "description", "הערות", "הערה", "הערות נוספות", "תיאור"],
-    minQty: ["min", "min qty", "minqty", "minimum", "threshold", "reorder", "min stock", "minstock", "reorder point", "מינימום", "מלאי מינימום", "כמות מינימום", "סף", "סף מלאי"]
+    minQty: ["min", "min qty", "minqty", "minimum", "threshold", "reorder", "min stock", "minstock", "reorder point", "red line", "redline", "מינימום", "מלאי מינימום", "כמות מינימום", "סף", "סף מלאי", "קו אדום"]
   };
 
   const COL_WIDTHS = {
@@ -1145,29 +1145,90 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
 
   function normalizeHeader(h) {
     return String(h ?? "")
-      .replace(/[\u200f\u200e\u00a0]/g, " ")
-      .replace(/[״″‟”"]/g, '"')
-      .replace(/[׳'’]/g, "'")
+      .replace(/[\u200f\u200e\u202a-\u202e\u00a0\u200b]/g, " ")
+      .replace(/[״″‟”"«»]/g, '"')
+      .replace(/[׳'’`]/g, "'")
       .replace(/\s+/g, " ")
+      .trim()
+      .replace(/^["']+|["']+$/g, "")
+      .replace(/[:：]+$/g, "")
+      .replace(/^["']+|["']+$/g, "")
       .trim()
       .toLowerCase();
   }
 
+  function headerCompact(h) {
+    return normalizeHeader(h).replace(/["']/g, "").replace(/\s+/g, " ").trim();
+  }
+
+  function headerKey(h) {
+    return headerCompact(h).replace(/\s+/g, "");
+  }
+
+  function customFieldName(h) {
+    const cleaned = String(h ?? "")
+      .replace(/[\u200f\u200e\u202a-\u202e\u00a0\u200b]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(/[:：]+$/g, "")
+      .replace(/^["״″‟”«»'׳’`]+|["״″‟”«»'׳’`]+$/g, "")
+      .trim();
+    return cleaned || String(h ?? "").trim() || "שדה";
+  }
+
+  const GENERIC_HEADER_ALIASES = new Set([
+    "name", "item", "product", "שם", "פריט", "מוצר",
+    "type", "group", "סוג",
+    "quantity", "qty", "stock", "amount", "count", "units", "כמות", "מלאי", "יחידות", "יתרה",
+    "price", "cost", "מחיר", "עלות",
+    "sku", "barcode", "code", "מקט", "ברקוד", "קוד",
+    "note", "notes", "comment", "comments", "הערה", "הערות", "תיאור",
+    "min", "minimum", "threshold", "reorder", "סף", "מינימום"
+  ]);
+
+  function isCartonQuantityHeader(n) {
+    return /קרטון|להזמנה/.test(n) && !/במלאי|מלאי מינימום|קו אדום/.test(n);
+  }
+
   function guessRole(header) {
-    const n = normalizeHeader(header);
+    const n = headerCompact(header);
     if (!n) return "skip";
-    const compact = n.replace(/["'׳]/g, "");
+    const key = headerKey(header);
+    const carton = isCartonQuantityHeader(n);
+
     for (const [role, list] of Object.entries(ALIASES)) {
       for (const a of list) {
-        if (n === a || compact === a.replace(/["'׳]/g, "")) return role;
+        const an = headerCompact(a);
+        const ak = headerKey(a);
+        if (n === an || key === ak) {
+          if (role === "quantity" && carton) continue;
+          return role;
+        }
       }
     }
+
+    let best = null;
+    let bestLen = 0;
     for (const [role, list] of Object.entries(ALIASES)) {
       for (const a of list) {
-        if (a.length >= 2 && (n.includes(a) || compact.includes(a.replace(/["'׳]/g, "")))) return role;
+        const an = headerCompact(a);
+        const ak = headerKey(a);
+        if (an.length < 4 || GENERIC_HEADER_ALIASES.has(an) || GENERIC_HEADER_ALIASES.has(ak)) continue;
+        if (n.includes(an) || (ak.length >= 4 && key.includes(ak))) {
+          if (role === "quantity" && carton) continue;
+          if (an.length > bestLen) {
+            best = role;
+            bestLen = an.length;
+          }
+        }
       }
     }
-    return "custom";
+    return best || "custom";
+  }
+
+  function isCombinedSheetName(name) {
+    const n = headerCompact(name);
+    return n === "הכל" || n === "מלאי" || n === "all" || n === "inventory";
   }
 
   function parseNumber(v) {
@@ -1589,7 +1650,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       const wb = await readWorkbook(file);
       const sheets = wb.SheetNames || [];
       if (!sheets.length) { showToast("לא נמצאו גיליונות בקובץ"); return; }
-      const preferred = sheets.find((n) => n === "הכל" || n === "מלאי") || sheets[0];
+      const preferred = sheets.find(isCombinedSheetName) || sheets[0];
       importDraft = { wb, fileName: file.name, sheet: preferred, headers: [], rows: [], mapping: [] };
       loadImportSheet(preferred);
       openModal("import-modal");
@@ -1599,23 +1660,66 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     }
   }
 
-  function loadImportSheet(name) {
-    const { headers, rows } = sheetToRows(importDraft.wb, name);
-    importDraft.sheet = name;
-    importDraft.headers = headers;
-    importDraft.rows = rows;
+  function guessMapping(headers) {
     const guesses = uniqueRoles(headers.map(guessRole));
-    // If no name column, use first non-skip as name
     if (!guesses.includes("name") && headers.length) {
       const idx = guesses.findIndex((g) => g === "custom" || g === "skip");
       if (idx >= 0) guesses[idx] = "name";
       else guesses[0] = "name";
     }
-    importDraft.mapping = guesses;
+    return guesses;
+  }
+
+  function fallbackCategory(sheetName, mapping) {
+    if ((mapping || []).includes("category")) return "";
+    const n = headerCompact(sheetName);
+    if (!n || isCombinedSheetName(sheetName)) return "";
+    if (/^sheet\s*\d+$/i.test(n) || n === "גיליון" || /^גיליון\s*\d+$/.test(n)) return "";
+    return String(sheetName || "").trim();
+  }
+
+  function headersEqual(a, b) {
+    if (!a || !b || a.length !== b.length) return false;
+    return a.every((h, i) => headerKey(h) === headerKey(b[i]));
+  }
+
+  function sheetsToImport(wb) {
+    const sheets = (wb && wb.SheetNames) || [];
+    const combined = sheets.find(isCombinedSheetName);
+    return combined ? [combined] : sheets.slice();
+  }
+
+  function collectImportItems(draft) {
+    const names = sheetsToImport(draft.wb);
+    const items = [];
+    for (const name of names) {
+      const parsed = (name === draft.sheet)
+        ? { headers: draft.headers, rows: draft.rows }
+        : sheetToRows(draft.wb, name);
+      const headers = parsed.headers;
+      const rows = parsed.rows;
+      let mapping;
+      if (name === draft.sheet || headersEqual(headers, draft.headers)) mapping = draft.mapping.slice();
+      else mapping = guessMapping(headers);
+      const fallback = fallbackCategory(name, mapping);
+      for (const r of rows) {
+        const it = mappingToItem(r, headers, mapping, fallback);
+        if (it.name) items.push(it);
+      }
+    }
+    return items;
+  }
+
+  function loadImportSheet(name) {
+    const { headers, rows } = sheetToRows(importDraft.wb, name);
+    importDraft.sheet = name;
+    importDraft.headers = headers;
+    importDraft.rows = rows;
+    importDraft.mapping = guessMapping(headers);
     renderImportModal();
   }
 
-  function mappingToItem(row, headers, mapping) {
+  function mappingToItem(row, headers, mapping, fallbackCategory) {
     const it = {
       id: uid(),
       name: "",
@@ -1638,20 +1742,23 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
         it[role] = parseNumber(raw != null && raw !== "" ? raw : text);
         if (role === "quantity" && it.quantity == null) it.quantity = 0;
       } else if (role === "custom") {
-        if (text !== "") it.custom[h] = text;
+        if (text !== "") it.custom[customFieldName(h)] = text;
       } else {
         it[role] = text;
       }
     });
-    it.quantity = Number(it.quantity) || 0;
+    if (!(it.category || "").trim() && fallbackCategory) it.category = String(fallbackCategory);
+    const qty = parseNumber(it.quantity);
+    it.quantity = qty == null ? 0 : qty;
     return it;
   }
 
   function applyImport() {
     if (!importDraft) return;
-    const mapping = importDraft.mapping.slice();
-    if (!mapping.includes("name")) { showToast("יש לבחור עמודה לשם הפריט"); return; }
-    const items = importDraft.rows.map((r) => mappingToItem(r, importDraft.headers, mapping)).filter((it) => it.name);
+    const names = sheetsToImport(importDraft.wb);
+    const usesCurrent = names.some((n) => n === importDraft.sheet || headersEqual(sheetToRows(importDraft.wb, n).headers, importDraft.headers));
+    if (usesCurrent && !importDraft.mapping.includes("name")) { showToast("יש לבחור עמודה לשם הפריט"); return; }
+    const items = collectImportItems(importDraft);
     if (!items.length) { showToast("לא נמצאו פריטים לייבוא"); return; }
     const mode = ($("input[name=import-mode]:checked") || {}).value || "replace";
     const matchBy = ($("input[name=import-match]:checked") || {}).value || "sku";
@@ -2155,7 +2262,10 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
         "</select></td></tr>";
     });
     $("#import-map").innerHTML = "<thead><tr><th>עמודה בקובץ</th><th>דגימה</th><th>ייבוא בתור</th></tr></thead><tbody>" + body + "</tbody>";
-    $("#import-count").textContent = "נמצאו " + importDraft.rows.length + " שורות ב«" + importDraft.sheet + "».";
+    const allSheets = sheetsToImport(importDraft.wb);
+    let msg = "נמצאו " + importDraft.rows.length + " שורות ב«" + importDraft.sheet + "».";
+    if (allSheets.length > 1) msg += " בעת הייבוא ייכללו כל " + allSheets.length + " הגיליונות.";
+    $("#import-count").textContent = msg;
     const hasExisting = state.items.length > 0;
     $("#import-existing").style.display = hasExisting ? "" : "none";
     if (!hasExisting) {
