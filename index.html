@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="color-scheme" content="light dark" />
-  <title>ניהול מלאי | Fly With Yakov</title>
+  <title>ניהול מלאי יובלים</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231B2740'/%3E%3Cpath fill='%23C9A24A' d='M26 20.5v-2l-8-5V7.5A1.5 1.5 0 0 0 16.5 6 1.5 1.5 0 0 0 15 7.5V13l-8 5v2l8-2.5V23l-2 1.5V26l3.5-1 3.5 1v-1.5L18 23v-5.5L26 20.5z'/%3E%3C/svg%3E" />
-  <style>/* Fly With Yakov — Inventory Manager */
+  <style>/* יובלים — ניהול מלאי */
 :root {
   --gold: #C9A24A;
   --gold-hover: #B8913A;
@@ -609,6 +609,130 @@ label.fld textarea { min-height: 80px; resize: vertical; }
   gap: 8px;
 }
 .card-group h4 .g-meta { font-weight: 600; color: var(--muted); font-size: 12px; }
+
+.empty-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 4px; }
+
+.ocr-progress-track {
+  height: 12px;
+  background: var(--surface-2);
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  margin-top: 8px;
+}
+.ocr-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--gold);
+  transition: width .2s ease;
+}
+.ocr-progress-pct {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--muted);
+  text-align: center;
+}
+.ocr-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: end;
+  margin: 4px 0 12px;
+}
+.ocr-toolbar .fld { min-width: 180px; flex: 1 1 180px; }
+.ocr-review-wrap {
+  overflow: auto;
+  max-height: 50vh;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+table.ocr-review {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 680px;
+  font-size: 13.5px;
+}
+table.ocr-review th, table.ocr-review td {
+  padding: 8px 8px;
+  text-align: right;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+table.ocr-review th {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--surface-2);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  white-space: nowrap;
+}
+table.ocr-review input, table.ocr-review select {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 7px 8px;
+  font-weight: 500;
+  outline: none;
+}
+table.ocr-review input:focus, table.ocr-review select:focus {
+  border-color: var(--gold);
+  box-shadow: var(--focus);
+}
+table.ocr-review .ocr-cat { display: flex; flex-direction: column; gap: 6px; min-width: 140px; }
+table.ocr-review td.num input { min-width: 72px; }
+table.ocr-review .ocr-del { width: 36px; padding: 0; }
+#ocr-raw details { margin-top: 10px; color: var(--muted); font-size: 12.5px; }
+#ocr-raw pre {
+  white-space: pre-wrap;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin-top: 6px;
+  max-height: 120px;
+  overflow: auto;
+  font-size: 12px;
+}
+
+@media (max-width: 860px) {
+  table.ocr-review { min-width: 0; }
+  table.ocr-review thead { display: none; }
+  table.ocr-review, table.ocr-review tbody, table.ocr-review tr, table.ocr-review td { display: block; width: 100%; }
+  table.ocr-review tr {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    margin: 0 8px 10px;
+    padding: 8px 10px 10px;
+    background: var(--surface-2);
+    width: auto;
+  }
+  table.ocr-review td {
+    border: 0;
+    padding: 6px 0;
+    display: grid;
+    grid-template-columns: 84px 1fr;
+    align-items: center;
+    gap: 8px;
+  }
+  table.ocr-review td::before {
+    content: attr(data-label);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+  table.ocr-review td.ocr-del-cell {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+  table.ocr-review td.ocr-del-cell::before { display: none; }
+  .ocr-review-wrap { border: 0; max-height: none; }
+}
 </style>
 </head>
 <body>
@@ -620,11 +744,12 @@ label.fld textarea { min-height: 80px; resize: vertical; }
         </div>
         <div>
           <h1>ניהול מלאי</h1>
-          <div class="tag">Fly With Yakov</div>
+          <div class="tag">יובלים</div>
         </div>
       </div>
       <div class="header-actions">
         <button class="btn btn-outline hide-sm" id="btn-import" type="button"></button>
+        <button class="btn btn-outline hide-sm" id="btn-import-img" type="button"></button>
         <button class="btn btn-outline hide-sm" id="btn-export" type="button"></button>
         <button class="btn btn-outline hide-sm" id="btn-export-cat" type="button"></button>
         <button class="btn btn-primary hide-sm" id="btn-add" type="button"></button>
@@ -632,6 +757,7 @@ label.fld textarea { min-height: 80px; resize: vertical; }
           <button class="btn btn-icon" id="more-btn" type="button" title="עוד פעולות" aria-label="עוד פעולות"></button>
           <div class="menu-pop">
             <button type="button" id="btn-import-m"></button>
+            <button type="button" id="btn-import-img-m"></button>
             <button type="button" id="btn-export-m"></button>
             <button type="button" id="btn-export-cat-m"></button>
             <button type="button" id="btn-json"></button>
@@ -699,9 +825,12 @@ label.fld textarea { min-height: 80px; resize: vertical; }
         <div class="empty" id="empty-state">
           <div class="dropzone" id="dropzone">
             <h3>המערכת מוכנה לקלוט מלאי</h3>
-            <p>גררו לכאן קובץ אקסל או CSV, או לחצו לבחירת קובץ. העמודות יזוהו אוטומטית לפי השמות, ואפשר לאשר או לתקן לפני הייבוא.</p>
-            <button class="btn btn-primary" type="button" id="empty-import">ייבוא מאקסל</button>
-            <button class="btn btn-outline" type="button" id="empty-add">פריט ראשון ידנית</button>
+            <p>גררו לכאן קובץ אקסל, CSV או תמונה של רשימה, או בחרו קובץ. בטלפון אפשר גם לצלם את הרשימה. העמודות יזוהו אוטומטית, ואפשר לתקן לפני הייבוא.</p>
+            <div class="empty-actions">
+              <button class="btn btn-primary" type="button" id="empty-import">ייבוא מאקסל</button>
+              <button class="btn btn-outline" type="button" id="empty-import-img">ייבוא מתמונה</button>
+              <button class="btn btn-outline" type="button" id="empty-add">פריט ראשון ידנית</button>
+            </div>
           </div>
         </div>
 
@@ -713,6 +842,7 @@ label.fld textarea { min-height: 80px; resize: vertical; }
   <button class="btn btn-primary fab" id="fab-add" type="button">+ פריט חדש</button>
 
   <input type="file" id="file-excel" accept=".xlsx,.xls,.csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" hidden />
+  <input type="file" id="file-image" accept="image/*,.heic,.heif,image/heic,image/heif" hidden />
   <input type="file" id="file-json" accept=".json,application/json" hidden />
 
   <!-- Item modal -->
@@ -771,6 +901,62 @@ label.fld textarea { min-height: 80px; resize: vertical; }
         <button type="button" class="btn btn-ghost" data-close="import-modal">ביטול</button>
         <div class="right">
           <button type="button" class="btn btn-primary" id="import-commit">ייבוא</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OCR progress -->
+  <div class="overlay" id="ocr-progress-modal" data-locked="1">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="ocr-progress-title">
+      <h2 id="ocr-progress-title">ייבוא מתמונה</h2>
+      <p class="lead" id="ocr-progress-msg">מזהה טקסט מהתמונה…</p>
+      <div class="ocr-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="ocr-progress-track">
+        <div class="ocr-progress-bar" id="ocr-progress-bar"></div>
+      </div>
+      <p class="ocr-progress-pct" id="ocr-progress-pct">0%</p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="ocr-cancel">ביטול</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OCR review -->
+  <div class="overlay" id="ocr-review-modal">
+    <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="ocr-review-title">
+      <h2 id="ocr-review-title">בדיקה לפני ייבוא</h2>
+      <p class="lead" id="ocr-review-count">בדקו ותקנו את השורות שזוהו מהתמונה לפני השמירה.</p>
+      <div class="ocr-toolbar">
+        <label class="fld"><span>קטגוריה לכל השורות</span>
+          <select id="ocr-default-cat"></select>
+        </label>
+        <label class="fld" id="ocr-default-cat-new-wrap" style="display:none"><span>שם הקטגוריה החדשה</span>
+          <input id="ocr-default-cat-new" type="text" placeholder="לדוגמה: משרד" />
+        </label>
+        <button type="button" class="btn btn-outline" id="ocr-apply-cat">החל על כל השורות</button>
+      </div>
+      <div class="ocr-review-wrap">
+        <table class="ocr-review" id="ocr-review-table"></table>
+      </div>
+      <div id="ocr-raw"></div>
+      <div id="ocr-existing">
+        <div class="import-opts">
+          <strong>מה לעשות עם המלאי הקיים?</strong>
+          <label><input type="radio" name="ocr-import-mode" value="merge" checked /> מזג עם המלאי הקיים
+            <div class="hint">פריטים קיימים יעודכנו לפי ההתאמה למטה, ופריטים חדשים יתווספו.</div>
+          </label>
+          <label><input type="radio" name="ocr-import-mode" value="replace" /> החלף את כל המלאי בנתונים מהתמונה</label>
+        </div>
+        <div class="import-opts">
+          <strong>התאמה במיזוג לפי</strong>
+          <label><input type="radio" name="ocr-import-match" value="sku" checked /> מק״ט, ואם אין — לפי שם</label>
+          <label><input type="radio" name="ocr-import-match" value="name" /> שם הפריט</label>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-close="ocr-review-modal">ביטול</button>
+        <div class="right">
+          <button type="button" class="btn btn-primary" id="ocr-commit">אישור והוספה</button>
         </div>
       </div>
     </div>
@@ -886,7 +1072,8 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg>',
     more: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18" cy="12" r="1.6"/></svg>',
     settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9c.3.6.9 1 1.5 1.1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
-    plane: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5L21 16z"/></svg>'
+    plane: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5L21 16z"/></svg>',
+    camera: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8z"/><circle cx="12" cy="13" r="3.5"/></svg>'
   };
 
   /* ------------ helpers ------------ */
@@ -1036,7 +1223,22 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   let undoStack = null;
   let toastTimer = null;
   let importDraft = null;
+  let ocrDraft = null;
+  let ocrWorker = null;
+  let ocrCancelled = false;
   let persistTimer = null;
+
+  const TESSERACT_CDN = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+  const OCR_STATUS_HE = {
+    "loading tesseract core": "טוען את מנוע הזיהוי…",
+    "initializing tesseract": "מאתחל את מנוע הזיהוי…",
+    "initialized tesseract": "המנוע מוכן…",
+    "loading language traineddata": "טוען שפות (עברית ואנגלית)…",
+    "loaded language traineddata": "השפות נטענו…",
+    "initializing api": "מכין את הזיהוי…",
+    "initialized api": "מוכן לזיהוי…",
+    "recognizing text": "מזהה טקסט מהתמונה…"
+  };
 
   function defaultState() {
     return {
@@ -1449,7 +1651,10 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     ensureCategoryList();
     persist();
     closeModal("import-modal");
+    closeModal("ocr-review-modal");
+    closeModal("ocr-progress-modal");
     importDraft = null;
+    ocrDraft = null;
     render();
     showToast("יובאו " + items.length + " פריטים" + (mode === "merge" ? " (מיזוג)" : ""));
   }
@@ -1932,6 +2137,443 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   /* ------------ events ------------ */
+  /* ------------ image / OCR import ------------ */
+  function isImageFile(file) {
+    if (!file) return false;
+    const type = (file.type || "").toLowerCase();
+    const n = (file.name || "").toLowerCase();
+    return type.startsWith("image/") || /\.(png|jpe?g|gif|webp|bmp|heic|heif|tif|tiff)$/.test(n);
+  }
+
+  function splitOcrCells(line) {
+    const s = String(line || "").replace(/[\u200f\u200e\u00a0]/g, " ").trim();
+    if (!s) return [];
+    const parts = s.split(/\s*\|\s*|\t+| {2,}/).map((p) => p.trim()).filter(Boolean);
+    return parts.length ? parts : [s];
+  }
+
+  function lineLooksLikeHeaders(cells) {
+    if (!cells || cells.length < 2) return false;
+    const roles = cells.map(guessRole);
+    const known = roles.filter((r) => r !== "skip" && r !== "custom");
+    if (known.length < 2) return false;
+    const numeric = cells.filter((c) => parseNumber(c) != null && !/[A-Za-z\u0590-\u05FF]/.test(String(c))).length;
+    if (numeric >= 2) return false;
+    return known.some((r) => r === "name" || r === "quantity" || r === "price" || r === "category" || r === "sku");
+  }
+
+  function extractLineNumbers(line) {
+    const s = String(line || "");
+    const out = [];
+    const re = /[+-]?\d+(?:[.,]\d+)?/g;
+    let m;
+    while ((m = re.exec(s)) !== null) {
+      const start = m.index;
+      const end = start + m[0].length;
+      const before = start > 0 ? s[start - 1] : " ";
+      const after = end < s.length ? s[end] : " ";
+      if (/[A-Za-z\u0590-\u05FF]/.test(before) || /[A-Za-z\u0590-\u05FF]/.test(after)) continue;
+      const value = parseNumber(m[0]);
+      if (value == null) continue;
+      out.push({ raw: m[0], value: value, start: start, end: end });
+    }
+    return out;
+  }
+
+  function looksLikeSkuToken(tok) {
+    const t = String(tok || "").trim();
+    if (!t || t.length < 2 || t.length > 24) return false;
+    if (/^\d+([.,]\d+)?$/.test(t)) return false;
+    return /^(?:sku[-:]?)?[A-Za-z]{1,6}-?\d{2,}[A-Za-z0-9-]*$|^[A-Za-z]{2,}\d{2,}$|^\d{6,}$/.test(t);
+  }
+
+  function isDecimalNumber(num) {
+    return /[.,]\d+$/.test(String(num.raw || ""));
+  }
+
+  function assignQtyPrice(closer, farther) {
+    if (isDecimalNumber(closer) && !isDecimalNumber(farther)) {
+      return { quantity: farther.value, price: closer.value };
+    }
+    return { quantity: closer.value, price: farther.value };
+  }
+
+  function leadingNumbers(text, nums) {
+    const out = [];
+    for (let i = 0; i < nums.length; i++) {
+      const before = text.slice(0, nums[i].start);
+      if (i === 0 && !/^[\s]*$/.test(before)) break;
+      if (i > 0 && !/^[\s\d.,+\-]*$/.test(text.slice(0, nums[i].start))) break;
+      const between = i === 0 ? before : text.slice(nums[i - 1].end, nums[i].start);
+      if (!/^[\s]*$/.test(between) && i > 0 && !/^[\s]+$/.test(between)) break;
+      out.push(nums[i]);
+    }
+    return out;
+  }
+
+  function trailingNumbers(text, nums) {
+    const out = [];
+    for (let i = nums.length - 1; i >= 0; i--) {
+      const after = text.slice(nums[i].end);
+      if (!/^[\s\d.,+\-]*$/.test(after)) break;
+      out.unshift(nums[i]);
+    }
+    return out;
+  }
+
+  function parseOcrLine(line) {
+    const text = String(line || "").replace(/[\u200f\u200e\u00a0]/g, " ").replace(/\s+/g, " ").trim();
+    if (!text) return null;
+    if (/^[\-_=*.•·]+$/.test(text)) return null;
+    const nums = extractLineNumbers(text);
+    let quantity = 0;
+    let price = null;
+    let sku = "";
+    let name = text;
+
+    const trailing = trailingNumbers(text, nums);
+    const leading = leadingNumbers(text, nums);
+
+    if (trailing.length >= 2 && trailing[0].start > 0) {
+      const closer = trailing[trailing.length - 2];
+      const farther = trailing[trailing.length - 1];
+      const ap = assignQtyPrice(closer, farther);
+      quantity = ap.quantity;
+      price = ap.price;
+      name = (text.slice(0, closer.start) + " " + text.slice(farther.end)).replace(/\s+/g, " ").trim();
+    } else if (leading.length >= 2 && leading[leading.length - 1].end < text.length) {
+      const farther = leading[0];
+      const closer = leading[1];
+      const ap = assignQtyPrice(closer, farther);
+      quantity = ap.quantity;
+      price = ap.price;
+      name = (text.slice(0, farther.start) + " " + text.slice(closer.end)).replace(/\s+/g, " ").trim();
+    } else if (trailing.length === 1 && trailing[0].start > 0) {
+      const n = trailing[0];
+      quantity = n.value;
+      name = (text.slice(0, n.start) + " " + text.slice(n.end)).replace(/\s+/g, " ").trim();
+    } else if (leading.length === 1 && leading[0].end < text.length) {
+      const n = leading[0];
+      quantity = n.value;
+      name = (text.slice(0, n.start) + " " + text.slice(n.end)).replace(/\s+/g, " ").trim();
+    } else if (nums.length === 1) {
+      const n = nums[0];
+      quantity = n.value;
+      name = (text.slice(0, n.start) + " " + text.slice(n.end)).replace(/\s+/g, " ").trim();
+    }
+
+    const tokens = name.split(" ").filter(Boolean);
+    const skuTok = tokens.find(looksLikeSkuToken);
+    if (skuTok) {
+      sku = skuTok.replace(/^sku[-:]/i, "");
+      name = tokens.filter((t) => t !== skuTok).join(" ");
+    }
+
+    name = name.replace(/^[\-–—:·•.,]+|[\-–—:·•.,]+$/g, "").trim();
+    if (!name) return null;
+    return { name: name, category: "", quantity: quantity || 0, price: price, sku: sku };
+  }
+
+  function parseOcrText(raw) {
+    const lines = String(raw || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n")
+      .map((l) => l.replace(/[\u200f\u200e\u00a0]/g, " ").trim())
+      .filter((l) => l && !/^[\-_=*.•·]+$/.test(l));
+    if (!lines.length) return { rows: [], usedHeaders: false, headers: [] };
+
+    const firstCells = splitOcrCells(lines[0]);
+    let headerCells = lineLooksLikeHeaders(firstCells) ? firstCells : null;
+    if (!headerCells) {
+      const tokens = lines[0].split(/\s+/).filter(Boolean);
+      if (lineLooksLikeHeaders(tokens)) headerCells = tokens;
+    }
+
+    if (headerCells) {
+      const mapping = uniqueRoles(headerCells.map(guessRole));
+      if (!mapping.includes("name")) {
+        const idx = mapping.findIndex((g) => g === "custom" || g === "skip");
+        if (idx >= 0) mapping[idx] = "name";
+        else mapping[0] = "name";
+      }
+      const rows = [];
+      for (const line of lines.slice(1)) {
+        let cells = splitOcrCells(line);
+        if (cells.length === 1 && headerCells.length > 2) {
+          const toks = line.split(/\s+/).filter(Boolean);
+          if (toks.length >= 2) cells = toks;
+        }
+        if (cells.length > headerCells.length) {
+          const extra = cells.length - headerCells.length;
+          const nameIdx = mapping.indexOf("name");
+          if (nameIdx >= 0) {
+            cells = cells.slice(0, nameIdx)
+              .concat([cells.slice(nameIdx, nameIdx + extra + 1).join(" ")])
+              .concat(cells.slice(nameIdx + extra + 1));
+          }
+        }
+        while (cells.length < headerCells.length) cells.push("");
+        const item = mappingToItem(cells, headerCells, mapping);
+        if (item && item.name) {
+          rows.push({
+            id: uid(),
+            name: item.name,
+            category: item.category || "",
+            quantity: item.quantity || 0,
+            price: item.price,
+            sku: item.sku || ""
+          });
+        }
+      }
+      return { rows: rows, usedHeaders: true, headers: headerCells };
+    }
+
+    const start = (!extractLineNumbers(lines[0]).length && lines.length > 1) ? 1 : 0;
+    const rows = [];
+    for (const line of lines.slice(start)) {
+      const parsed = parseOcrLine(line);
+      if (parsed) rows.push(Object.assign({ id: uid() }, parsed));
+    }
+    return { rows: rows, usedHeaders: false, headers: [] };
+  }
+
+  function ocrOfflineError() {
+    return "אין חיבור לאינטרנט. ייבוא מתמונה דורש חיבור כדי לטעון את מנוע זיהוי הטקסט.";
+  }
+
+  function loadTesseractScript() {
+    if (window.Tesseract) return Promise.resolve(window.Tesseract);
+    return new Promise((resolve, reject) => {
+      const existing = document.querySelector("script[data-tesseract]");
+      if (existing) {
+        existing.addEventListener("load", () => window.Tesseract ? resolve(window.Tesseract) : reject(new Error("offline")));
+        existing.addEventListener("error", () => reject(new Error("offline")));
+        return;
+      }
+      const s = document.createElement("script");
+      s.src = TESSERACT_CDN;
+      s.async = true;
+      s.dataset.tesseract = "1";
+      s.onload = () => window.Tesseract ? resolve(window.Tesseract) : reject(new Error("offline"));
+      s.onerror = () => reject(new Error("offline"));
+      document.head.appendChild(s);
+    });
+  }
+
+  async function ensureTesseract() {
+    if (window.Tesseract) return window.Tesseract;
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      throw new Error("offline");
+    }
+    try {
+      return await loadTesseractScript();
+    } catch (e) {
+      throw new Error("offline");
+    }
+  }
+
+  function setOcrProgress(pct, message) {
+    const bar = $("#ocr-progress-bar");
+    const track = $("#ocr-progress-track");
+    const label = $("#ocr-progress-pct");
+    const msg = $("#ocr-progress-msg");
+    const n = Math.max(0, Math.min(100, Math.round(pct || 0)));
+    if (bar) bar.style.width = n + "%";
+    if (track) track.setAttribute("aria-valuenow", String(n));
+    if (label) label.textContent = n + "%";
+    if (message && msg) msg.textContent = message;
+  }
+
+  function pickOcrFile() {
+    const input = $("#file-image");
+    if (input) input.click();
+  }
+
+  async function beginImageImport(file) {
+    if (!file) return;
+    ocrCancelled = false;
+    setOcrProgress(0, "מתחיל לטעון את מנוע הזיהוי…");
+    openModal("ocr-progress-modal");
+    let worker = null;
+    try {
+      const Tesseract = await ensureTesseract();
+      if (ocrCancelled) return;
+      setOcrProgress(4, "טוען את מנוע הזיהוי…");
+      if (!ocrWorker) {
+        ocrWorker = await Tesseract.createWorker("heb+eng", 1, {
+          logger: (m) => {
+            if (!m) return;
+            const status = OCR_STATUS_HE[m.status] || "מעבד את התמונה…";
+            const pct = 8 + Math.round((Number(m.progress) || 0) * 90);
+            setOcrProgress(pct, status);
+          },
+          errorHandler: (err) => console.error(err)
+        });
+      }
+      worker = ocrWorker;
+      if (ocrCancelled) return;
+      setOcrProgress(12, "מזהה טקסט מהתמונה…");
+      const result = await worker.recognize(file);
+      if (ocrCancelled) return;
+      const raw = (result && result.data && result.data.text) ? result.data.text : "";
+      const parsed = parseOcrText(raw);
+      if (!parsed.rows.length) {
+        closeModal("ocr-progress-modal");
+        showToast("לא זוהו פריטים בתמונה. נסו תמונה ברורה יותר.");
+        return;
+      }
+      ocrDraft = { rows: parsed.rows, rawText: raw, usedHeaders: parsed.usedHeaders, fileName: file.name || "" };
+      closeModal("ocr-progress-modal");
+      renderOcrReview();
+      openModal("ocr-review-modal");
+    } catch (e) {
+      console.error(e);
+      closeModal("ocr-progress-modal");
+      const msg = String((e && e.message) || e || "");
+      if (msg === "offline" || /fetch|network|load|cdn|failed to fetch|offline/i.test(msg) || (typeof navigator !== "undefined" && navigator.onLine === false)) {
+        showToast(ocrOfflineError());
+      } else if (/heic|heif|decode|image|bitmap/i.test(msg)) {
+        showToast("לא ניתן לקרוא את התמונה. נסו קובץ JPG או PNG.");
+      } else {
+        showToast("זיהוי הטקסט נכשל. בדקו את החיבור לאינטרנט ונסו תמונה ברורה יותר.");
+      }
+    }
+  }
+
+  async function cancelOcr() {
+    ocrCancelled = true;
+    closeModal("ocr-progress-modal");
+    showToast("הייבוא מהתמונה בוטל");
+  }
+
+  function ocrCategoryOptions(selected) {
+    const cats = allCategoryNames().filter((c) => c !== UNCATEGORIZED);
+    const sel = selected || "";
+    const known = !sel || cats.includes(sel);
+    let html = '<option value="">' + UNCATEGORIZED + "</option>";
+    html += cats.map((c) => '<option value="' + escapeHtml(c) + '"' + (c === sel ? " selected" : "") + ">" + escapeHtml(c) + "</option>").join("");
+    html += '<option value="__other__"' + (!known && sel ? " selected" : "") + ">אחר…</option>";
+    return html;
+  }
+
+  function renderOcrReview() {
+    if (!ocrDraft) return;
+    const defaultSel = $("#ocr-default-cat");
+    const currentDefault = defaultSel ? defaultSel.value : "";
+    const cats = allCategoryNames().filter((c) => c !== UNCATEGORIZED);
+    defaultSel.innerHTML =
+      '<option value="">' + UNCATEGORIZED + "</option>" +
+      cats.map((c) => '<option value="' + escapeHtml(c) + '">' + escapeHtml(c) + "</option>").join("") +
+      '<option value="__other__">קטגוריה חדשה…</option>';
+    if (currentDefault && (currentDefault === "__other__" || cats.includes(currentDefault))) defaultSel.value = currentDefault;
+    const newWrap = $("#ocr-default-cat-new-wrap");
+    if (newWrap) newWrap.style.display = defaultSel.value === "__other__" ? "" : "none";
+
+    let body = "";
+    ocrDraft.rows.forEach((r) => {
+      const known = !r.category || cats.includes(r.category);
+      const otherVal = known ? "" : r.category;
+      const otherDisplay = known ? "none" : "";
+      body += "<tr data-ocr-id=\"" + escapeHtml(r.id) + "\">" +
+        '<td data-label="שם"><input data-ocr-field="name" value="' + escapeHtml(r.name) + '" /></td>' +
+        '<td data-label="קטגוריה"><div class="ocr-cat">' +
+          '<select data-ocr-field="category">' + ocrCategoryOptions(r.category) + "</select>" +
+          '<input data-ocr-field="category-other" type="text" placeholder="שם קטגוריה" value="' + escapeHtml(otherVal) + '" style="display:' + otherDisplay + '" />' +
+        "</div></td>" +
+        '<td class="num" data-label="כמות"><input data-ocr-field="quantity" type="number" min="0" step="any" value="' + escapeHtml(r.quantity == null ? 0 : r.quantity) + '" /></td>' +
+        '<td class="num" data-label="מחיר"><input data-ocr-field="price" type="number" min="0" step="0.01" value="' + escapeHtml(r.price == null ? "" : r.price) + '" /></td>' +
+        '<td data-label="מק״ט"><input data-ocr-field="sku" value="' + escapeHtml(r.sku || "") + '" /></td>' +
+        '<td class="ocr-del-cell" data-label=""><button type="button" class="btn btn-icon btn-danger ocr-del" data-ocr-del="' + escapeHtml(r.id) + '" title="מחק שורה" aria-label="מחק שורה">' + ICONS.trash + "</button></td>" +
+        "</tr>";
+    });
+    $("#ocr-review-table").innerHTML =
+      "<thead><tr><th>שם</th><th>קטגוריה</th><th>כמות</th><th>מחיר</th><th>מק״ט</th><th></th></tr></thead><tbody>" +
+      (body || '<tr><td colspan="6">אין שורות לייבוא</td></tr>') + "</tbody>";
+    $("#ocr-review-count").textContent = "זוהו " + ocrDraft.rows.length + " פריטים" + (ocrDraft.usedHeaders ? " לפי כותרות העמודות בתמונה." : " מהתמונה.") + " אפשר לתקן, למחוק שורות או לבחור קטגוריה לכולם לפני האישור.";
+    const hasExisting = state.items.length > 0;
+    $("#ocr-existing").style.display = hasExisting ? "" : "none";
+    const rawBox = $("#ocr-raw");
+    if (rawBox) {
+      rawBox.innerHTML = ocrDraft.rawText
+        ? "<details><summary>הטקסט שזוהה</summary><pre>" + escapeHtml(ocrDraft.rawText) + "</pre></details>"
+        : "";
+    }
+  }
+
+  function rowByOcrId(id) {
+    return ocrDraft && ocrDraft.rows.find((r) => r.id === id);
+  }
+
+  function syncOcrRowFromField(el) {
+    const tr = el.closest("tr[data-ocr-id]");
+    if (!tr || !ocrDraft) return;
+    const row = rowByOcrId(tr.dataset.ocrId);
+    if (!row) return;
+    const field = el.dataset.ocrField;
+    if (field === "name") row.name = el.value;
+    else if (field === "sku") row.sku = el.value;
+    else if (field === "quantity") row.quantity = parseNumber(el.value) || 0;
+    else if (field === "price") row.price = el.value === "" ? null : parseNumber(el.value);
+    else if (field === "category") {
+      if (el.value === "__other__") {
+        const other = tr.querySelector("[data-ocr-field=category-other]");
+        if (other) {
+          other.style.display = "";
+          other.focus();
+          row.category = other.value.trim();
+        }
+      } else {
+        const other = tr.querySelector("[data-ocr-field=category-other]");
+        if (other) other.style.display = "none";
+        row.category = el.value;
+      }
+    } else if (field === "category-other") {
+      row.category = el.value.trim();
+    }
+  }
+
+  function applyDefaultOcrCategory() {
+    if (!ocrDraft) return;
+    const sel = $("#ocr-default-cat");
+    let cat = sel ? sel.value : "";
+    if (cat === "__other__") {
+      const input = $("#ocr-default-cat-new");
+      cat = input ? input.value.trim() : "";
+      if (!cat) { showToast("כתבו את שם הקטגוריה החדשה"); return; }
+    }
+    ocrDraft.rows.forEach((r) => { r.category = cat; });
+    renderOcrReview();
+    showToast(cat ? ("הקטגוריה «" + cat + "» הוחלה על כל השורות") : "הקטגוריה נוקתה בכל השורות");
+  }
+
+  function applyOcrImport() {
+    if (!ocrDraft) return;
+    // flush any unsynced fields
+    $$("#ocr-review-table [data-ocr-field]").forEach(syncOcrRowFromField);
+    const items = ocrDraft.rows
+      .map((r) => normalizeItem({
+        name: (r.name || "").trim(),
+        category: (r.category || "").trim() === UNCATEGORIZED ? "" : (r.category || "").trim(),
+        quantity: r.quantity,
+        price: r.price,
+        sku: r.sku
+      }))
+      .filter((it) => it.name);
+    if (!items.length) { showToast("לא נמצאו פריטים לייבוא"); return; }
+    const mode = ($("input[name=ocr-import-mode]:checked") || {}).value || (state.items.length ? "merge" : "replace");
+    const matchBy = ($("input[name=ocr-import-match]:checked") || {}).value || "sku";
+    if (mode === "replace" && state.items.length) {
+      confirmModal(
+        "החלפת המלאי",
+        "הייבוא ימחק את כל " + state.items.length + " הפריטים הקיימים ויוחלף ב־" + items.length + " פריטים מהתמונה. להמשיך?",
+        "החלף",
+        () => commitImport(items, "replace", matchBy)
+      );
+      return;
+    }
+    commitImport(items, mode, matchBy);
+  }
+
+  window.parseOcrInventoryText = parseOcrText;
+
   function setChrome() {
     $("#btn-import").innerHTML = ICONS.upload + " ייבוא מאקסל";
     $("#btn-export").innerHTML = ICONS.download + " ייצוא לאקסל";
@@ -1939,6 +2581,8 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     $("#more-btn").innerHTML = ICONS.more;
     $("#btn-import-m").innerHTML = ICONS.upload + " ייבוא מאקסל";
     $("#btn-export-m").innerHTML = ICONS.download + " ייצוא לאקסל";
+    $("#btn-import-img").innerHTML = ICONS.camera + " ייבוא מתמונה";
+    $("#btn-import-img-m").innerHTML = ICONS.camera + " ייבוא מתמונה";
     $("#btn-export-cat-m").innerHTML = ICONS.download + " ייצוא קטגוריה זו";
     $("#btn-json").innerHTML = "גיבוי JSON";
     $("#btn-restore").innerHTML = "שחזור מ-JSON";
@@ -1964,13 +2608,40 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     $("#btn-json").addEventListener("click", exportJson);
     $("#btn-import").addEventListener("click", () => $("#file-excel").click());
     $("#btn-import-m").addEventListener("click", () => $("#file-excel").click());
+    $("#btn-import-img").addEventListener("click", pickOcrFile);
+    $("#btn-import-img-m").addEventListener("click", pickOcrFile);
     $("#btn-restore").addEventListener("click", () => $("#file-json").click());
     $("#empty-import").addEventListener("click", (e) => { e.stopPropagation(); $("#file-excel").click(); });
+    $("#empty-import-img").addEventListener("click", (e) => { e.stopPropagation(); pickOcrFile(); });
     $("#empty-add").addEventListener("click", (e) => { e.stopPropagation(); openItemModal(null); });
     $("#file-excel").addEventListener("change", (e) => {
       const f = e.target.files && e.target.files[0];
       e.target.value = "";
       if (f) beginImport(f);
+    });
+    $("#file-image").addEventListener("change", (e) => {
+      const f = e.target.files && e.target.files[0];
+      e.target.value = "";
+      if (f) beginImageImport(f);
+    });
+    $("#ocr-cancel").addEventListener("click", cancelOcr);
+    $("#ocr-apply-cat").addEventListener("click", applyDefaultOcrCategory);
+    $("#ocr-default-cat").addEventListener("change", () => {
+      const wrap = $("#ocr-default-cat-new-wrap");
+      if (wrap) wrap.style.display = $("#ocr-default-cat").value === "__other__" ? "" : "none";
+    });
+    $("#ocr-commit").addEventListener("click", applyOcrImport);
+    $("#ocr-review-modal").addEventListener("input", (e) => {
+      if (e.target && e.target.dataset && e.target.dataset.ocrField) syncOcrRowFromField(e.target);
+    });
+    $("#ocr-review-modal").addEventListener("change", (e) => {
+      if (e.target && e.target.dataset && e.target.dataset.ocrField) syncOcrRowFromField(e.target);
+    });
+    $("#ocr-review-modal").addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-ocr-del]");
+      if (!btn || !ocrDraft) return;
+      ocrDraft.rows = ocrDraft.rows.filter((r) => r.id !== btn.dataset.ocrDel);
+      renderOcrReview();
     });
     $("#file-json").addEventListener("change", (e) => {
       const f = e.target.files && e.target.files[0];
@@ -2073,7 +2744,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       btn.addEventListener("click", () => closeModal(btn.dataset.close));
     });
     $$(".overlay").forEach((ov) => {
-      ov.addEventListener("click", (e) => { if (e.target === ov) ov.classList.remove("open"); });
+      ov.addEventListener("click", (e) => { if (e.target === ov && ov.dataset.locked !== "1") ov.classList.remove("open"); });
     });
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") closeAllModals();
@@ -2103,7 +2774,8 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       e.preventDefault();
       const f = files[0];
       const n = (f.name || "").toLowerCase();
-      if (n.endsWith(".json")) importJsonFile(f);
+      if (n.endsWith(".json") || (f.type || "") === "application/json") importJsonFile(f);
+      else if (isImageFile(f)) beginImageImport(f);
       else beginImport(f);
     });
     dz.addEventListener("click", () => $("#file-excel").click());
