@@ -152,7 +152,10 @@ a { color: var(--gold-ink); }
 .btn-outline:hover { border-color: var(--gold); background: var(--gold-soft); }
 .btn-danger { color: var(--danger); }
 .btn-danger:hover { background: var(--danger-bg); }
+.btn-danger-solid { background: var(--danger); color: #fff; border-color: var(--danger); }
+.btn-danger-solid:hover { background: #a53830; border-color: #a53830; color: #fff; }
 .btn-icon { width: 36px; height: 36px; padding: 0; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); }
+.btn-icon.btn-sm { width: 30px; height: 30px; }
 .btn-sm { padding: 5px 9px; font-size: 12.5px; border-radius: 8px; }
 
 /* Layout */
@@ -201,8 +204,15 @@ a { color: var(--gold-ink); }
 }
 .cat-item .cat-name { font-weight: 650; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cat-item .cat-meta { font-size: 11.5px; color: var(--muted); grid-column: 1; }
-.cat-item .cat-actions { grid-column: 2; grid-row: 1 / span 2; display: none; align-items: center; }
-.cat-item:hover .cat-actions, .cat-item:focus-within .cat-actions { display: flex; }
+.cat-item .cat-actions { grid-column: 2; grid-row: 1 / span 2; display: flex; align-items: center; gap: 0; }
+.cat-item .cat-actions .btn {
+  width: 30px; height: 30px; padding: 0;
+  border: 0; background: transparent; color: var(--muted);
+}
+.cat-item .cat-actions .btn:hover { background: var(--surface); color: var(--ink); }
+.cat-item .cat-actions .btn-del-cat { color: var(--danger); }
+.cat-item .cat-actions .btn-del-cat:hover { background: var(--danger-bg); }
+.cat-item .cat-actions .btn svg { width: 15px; height: 15px; }
 .cat-empty { padding: 20px 12px; color: var(--muted); font-size: 13px; text-align: center; }
 
 .main {
@@ -379,6 +389,8 @@ table.items .sku { font-variant-numeric: tabular-nums; letter-spacing: .02em; fo
   padding: 8px 12px;
 }
 .group-row .g-meta { font-weight: 600; color: var(--muted); font-size: 12px; margin-right: 8px; }
+.group-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.group-head .group-label { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; min-width: 0; }
 
 /* Empty */
 .empty {
@@ -408,7 +420,36 @@ table.items .sku { font-variant-numeric: tabular-nums; letter-spacing: .02em; fo
   padding: 2px 2px 6px;
   -webkit-overflow-scrolling: touch;
 }
-.cat-chips .chip { flex: 0 0 auto; }
+.cat-chips .chip, .chip-wrap { flex: 0 0 auto; }
+.chip-wrap {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 999px;
+  padding-left: 2px;
+}
+.chip-wrap .chip { border: 0; background: transparent; }
+.chip-wrap:has(.chip.active) {
+  background: var(--warn-bg);
+  border-color: #F0C48A;
+}
+[data-theme="dark"] .chip-wrap:has(.chip.active) { border-color: #8A6D28; }
+.chip-wrap:has(.chip.active) .chip { color: var(--warn); }
+.chip-del {
+  width: 30px; height: 30px;
+  border: 0; background: transparent;
+  color: var(--danger);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.chip-del:hover { background: var(--danger-bg); }
+.chip-del svg { width: 14px; height: 14px; }
 
 /* Mobile item cards */
 .cards { display: none; flex-direction: column; gap: 10px; }
@@ -555,6 +596,10 @@ label.fld textarea { min-height: 80px; resize: vertical; }
   gap: 8px;
 }
 .menu-pop button:hover { background: var(--surface-2); }
+.menu-pop button.danger-item { color: var(--danger); margin-top: 4px; box-shadow: inset 0 1px 0 var(--line); }
+.menu-pop button.danger-item:hover { background: var(--danger-bg); }
+.sidebar-foot { padding: 10px 12px 16px; border-top: 1px solid var(--line); }
+.sidebar-foot .btn { width: 100%; }
 
 .footer-note {
   font-size: 11.5px;
@@ -589,6 +634,7 @@ label.fld textarea { min-height: 80px; resize: vertical; }
     border-radius: 999px;
     box-shadow: var(--shadow);
   }
+  .toast { bottom: 76px; }
 }
 .fab { display: none; }
 @media (max-width: 520px) {
@@ -605,9 +651,11 @@ label.fld textarea { min-height: 80px; resize: vertical; }
   color: var(--ink);
   padding: 0 4px;
   display: flex;
-  align-items: baseline;
+  align-items: center;
+  justify-content: space-between;
   gap: 8px;
 }
+.card-group h4 .group-label { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; min-width: 0; }
 .card-group h4 .g-meta { font-weight: 600; color: var(--muted); font-size: 12px; }
 
 .empty-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 4px; }
@@ -763,6 +811,7 @@ table.ocr-review .ocr-del { width: 36px; padding: 0; }
             <button type="button" id="btn-json"></button>
             <button type="button" id="btn-restore"></button>
             <button type="button" id="btn-settings"></button>
+            <button type="button" id="btn-delete-all" class="danger-item"></button>
           </div>
         </div>
         <button class="btn btn-icon" id="theme-btn" type="button" title="מצב תצוגה" aria-label="החלפת מצב כהה"></button>
@@ -776,6 +825,9 @@ table.ocr-review .ocr-del { width: 36px; padding: 0; }
           <button class="btn btn-sm btn-outline" id="btn-add-cat" type="button">+ קטגוריה</button>
         </div>
         <div class="cat-list" id="cat-list"></div>
+        <div class="sidebar-foot">
+          <button type="button" class="btn btn-danger" id="btn-delete-all-side">מחק הכל</button>
+        </div>
       </aside>
 
       <main class="main">
@@ -1725,21 +1777,48 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   function deleteCategory(name) {
+    if (!name || name === "__all__") return;
     const count = state.items.filter((it) => categoryName(it.category) === name).length;
     const msg = count
-      ? "למחוק את הקטגוריה «" + name + "»? " + count + " פריטים יועברו ל«" + UNCATEGORIZED + "»."
+      ? "למחוק את הקטגוריה «" + name + "» ואת כל " + count + " הפריטים שבה? אפשר לבטל לזמן קצר אחרי המחיקה."
       : "למחוק את הקטגוריה «" + name + "»?";
     confirmModal("מחיקת קטגוריה", msg, "מחק", () => {
       pushUndo();
       state.categories = state.categories.filter((c) => c !== name);
-      for (const it of state.items) {
-        if (categoryName(it.category) === name) it.category = "";
-      }
+      state.items = state.items.filter((it) => categoryName(it.category) !== name);
       if (state.ui.selectedCategory === name) state.ui.selectedCategory = "__all__";
       persist();
       render();
-      showToast("הקטגוריה נמחקה", true);
-    });
+      showToast(count ? ("נמחקה הקטגוריה «" + name + "» ו־" + count + " פריטים") : ("הקטגוריה «" + name + "» נמחקה"), true);
+    }, { danger: true });
+  }
+
+  function deleteAll() {
+    const count = state.items.length;
+    const catCount = state.categories.length;
+    if (!count && !catCount) {
+      showToast("אין נתונים למחיקה");
+      return;
+    }
+    const parts = [];
+    if (count) parts.push(count + " פריטים");
+    if (catCount) parts.push(catCount + " קטגוריות");
+    const msg = "פעולה זו תמחק את כל המלאי מהאתר ומהשמירה המקומית במכשיר: " +
+      parts.join(" ו־") +
+      ". אפשר לבטל לזמן קצר אחרי המחיקה, לפני שההודעה נעלמת.";
+    confirmModal("מחיקת כל המלאי", msg, "מחק הכל", () => {
+      pushUndo();
+      state.items = [];
+      state.categories = [];
+      state.ui.selectedCategory = "__all__";
+      state.ui.query = "";
+      state.ui.lowOnly = false;
+      state.ui.customCols = [];
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      persist();
+      render();
+      showToast(count ? ("נמחקו כל " + count + " הפריטים") : "כל הקטגוריות נמחקו", true);
+    }, { danger: true });
   }
 
   function changeQty(id, delta) {
@@ -1794,7 +1873,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       persist();
       render();
       showToast("הפריט נמחק", true);
-    });
+    }, { danger: true });
   }
 
   /* ------------ render ------------ */
@@ -1862,11 +1941,11 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     box.innerHTML = html || '<div class="cat-empty">עדיין אין קטגוריות. ייבאו קובץ או הוסיפו פריט.</div>';
 
     const chips = $("#cat-chips");
-    let chipsHtml = chipBtn("__all__", "הכל (" + all.count + ")", state.ui.selectedCategory === "__all__");
+    let chipsHtml = chipBtn("__all__", "הכל (" + all.count + ")", state.ui.selectedCategory === "__all__", false);
     for (const c of names) {
       const st = statsFor(c);
       if (st.count === 0 && c === UNCATEGORIZED && !state.categories.includes(c)) continue;
-      chipsHtml += chipBtn(c, c + " (" + st.count + ")", state.ui.selectedCategory === c);
+      chipsHtml += chipBtn(c, c + " (" + st.count + ")", state.ui.selectedCategory === c, true);
     }
     chipsHtml += '<button type="button" class="chip" id="chip-add-cat">+ קטגוריה</button>';
     chips.innerHTML = chipsHtml;
@@ -1880,18 +1959,29 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   function catButton(id, label, st, active, editable) {
-    return '<button class="cat-item' + (active ? " active" : "") + '" data-cat="' + escapeHtml(id) + '" type="button">' +
+    const canDelete = id !== "__all__";
+    const canRename = !!editable && id !== UNCATEGORIZED;
+    const safe = escapeHtml(id);
+    const actions = (canDelete || canRename)
+      ? '<span class="cat-actions">' +
+        (canRename ? '<span class="btn btn-ghost btn-sm btn-rename-cat" data-cat="' + safe + '" title="שינוי שם" role="button" aria-label="שינוי שם לקטגוריה «' + escapeHtml(label) + '»">✎</span>' : "") +
+        (canDelete ? '<span class="btn btn-ghost btn-sm btn-del-cat" data-cat="' + safe + '" title="מחיקת קטגוריה" role="button" aria-label="מחיקת הקטגוריה «' + escapeHtml(label) + '»">' + ICONS.trash + "</span>" : "") +
+      "</span>"
+      : "";
+    return '<button class="cat-item' + (active ? " active" : "") + '" data-cat="' + safe + '" type="button">' +
       '<span class="cat-name">' + escapeHtml(label) + "</span>" +
-      (editable ? '<span class="cat-actions">' +
-        '<span class="btn btn-ghost btn-sm btn-rename-cat" data-cat="' + escapeHtml(id) + '" title="שינוי שם">✎</span>' +
-        '<span class="btn btn-ghost btn-sm btn-del-cat" data-cat="' + escapeHtml(id) + '" title="מחיקה">×</span>' +
-      "</span>" : "") +
+      actions +
       '<span class="cat-meta">' + st.count + " פריטים · " + formatNumber(st.units, 0) + " יח׳</span>" +
     "</button>";
   }
 
-  function chipBtn(id, label, active) {
-    return '<button type="button" class="chip' + (active ? " active" : "") + '" data-cat="' + escapeHtml(id) + '">' + escapeHtml(label) + "</button>";
+  function chipBtn(id, label, active, canDelete) {
+    const safe = escapeHtml(id);
+    const chip = '<button type="button" class="chip' + (active ? " active" : "") + '" data-cat="' + safe + '">' + escapeHtml(label) + "</button>";
+    if (!canDelete) return chip;
+    return '<span class="chip-wrap">' + chip +
+      '<button type="button" class="chip-del btn-del-cat" data-cat="' + safe + '" title="מחיקת קטגוריה" aria-label="מחיקת הקטגוריה «' + escapeHtml(label) + '»">' + ICONS.trash + "</button>" +
+    "</span>";
   }
 
   function sortMark(key) {
@@ -1946,8 +2036,9 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       if (!items.length) return;
       if (group) {
         const units = items.reduce((s, it) => s + (Number(it.quantity) || 0), 0);
-        body += '<tr class="group-row"><td colspan="' + colSpan + '">' + escapeHtml(c) +
-          '<span class="g-meta">' + items.length + " פריטים · " + formatNumber(units, 0) + " יח׳</span></td></tr>";
+        body += '<tr class="group-row"><td colspan="' + colSpan + '"><div class="group-head"><span class="group-label">' + escapeHtml(c) +
+          '<span class="g-meta">' + items.length + " פריטים · " + formatNumber(units, 0) + " יח׳</span></span>" +
+          '<button type="button" class="btn btn-icon btn-sm btn-danger btn-del-cat" data-cat="' + escapeHtml(c) + '" title="מחיקת קטגוריה" aria-label="מחיקת הקטגוריה «' + escapeHtml(c) + '»">' + ICONS.trash + "</button></div></td></tr>";
       }
       for (const it of items) body += renderRow(it, custom);
     }
@@ -1975,8 +2066,9 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     function cardGroupHtml(c, items) {
       if (!items.length) return "";
       const units = items.reduce((sum, it) => sum + (Number(it.quantity) || 0), 0);
-      return '<div class="card-group"><h4>' + escapeHtml(c) +
-        '<span class="g-meta">' + items.length + " פריטים · " + formatNumber(units, 0) + " יח׳</span></h4>" +
+      return '<div class="card-group"><h4><span class="group-label">' + escapeHtml(c) +
+        '<span class="g-meta">' + items.length + " פריטים · " + formatNumber(units, 0) + " יח׳</span></span>" +
+        '<button type="button" class="btn btn-icon btn-sm btn-danger btn-del-cat" data-cat="' + escapeHtml(c) + '" title="מחיקת קטגוריה" aria-label="מחיקת הקטגוריה «' + escapeHtml(c) + '»">' + ICONS.trash + "</button></h4>" +
         items.map((it) => renderCard(it)).join("") + "</div>";
     }
     if (group) {
@@ -2021,8 +2113,8 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       '<td class="muted">' + escapeHtml(it.location || "—") + "</td>" +
       custom.map((k) => '<td class="muted">' + escapeHtml((it.custom && it.custom[k]) || "—") + "</td>").join("") +
       '<td class="row-actions">' +
-        '<button class="btn btn-icon" data-act="edit" data-id="' + it.id + '" title="עריכה">' + ICONS.edit + "</button>" +
-        '<button class="btn btn-icon" data-act="del" data-id="' + it.id + '" title="מחיקה">' + ICONS.trash + "</button>" +
+        '<button class="btn btn-icon" data-act="edit" data-id="' + it.id + '" title="עריכה" aria-label="עריכת «' + escapeHtml(it.name) + '»">' + ICONS.edit + "</button>" +
+        '<button class="btn btn-icon btn-danger" data-act="del" data-id="' + it.id + '" title="מחיקה" aria-label="מחיקת «' + escapeHtml(it.name) + '»">' + ICONS.trash + "</button>" +
       "</td></tr>";
   }
 
@@ -2039,8 +2131,8 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       "</div>" +
       '<div class="bottom">' + qtyCtrl(it) +
         '<div class="row-actions">' +
-          '<button class="btn btn-icon" data-act="edit" data-id="' + it.id + '">' + ICONS.edit + "</button>" +
-          '<button class="btn btn-icon" data-act="del" data-id="' + it.id + '">' + ICONS.trash + "</button>" +
+          '<button class="btn btn-icon" data-act="edit" data-id="' + it.id + '" title="עריכה" aria-label="עריכת «' + escapeHtml(it.name) + '»">' + ICONS.edit + "</button>" +
+          '<button class="btn btn-icon btn-danger" data-act="del" data-id="' + it.id + '" title="מחיקה" aria-label="מחיקת «' + escapeHtml(it.name) + '»">' + ICONS.trash + "</button>" +
         "</div></div></article>";
   }
 
@@ -2114,11 +2206,15 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   function closeModal(id) { $("#" + id).classList.remove("open"); }
   function closeAllModals() { $$(".overlay.open").forEach((el) => el.classList.remove("open")); }
 
-  function confirmModal(title, message, okLabel, onOk) {
+  function confirmModal(title, message, okLabel, onOk, opts) {
     $("#confirm-title").textContent = title;
     $("#confirm-msg").textContent = message;
-    $("#confirm-ok").textContent = okLabel || "אישור";
-    $("#confirm-ok").onclick = () => { closeModal("confirm-modal"); onOk(); };
+    const ok = $("#confirm-ok");
+    const danger = !!(opts && opts.danger);
+    ok.textContent = okLabel || "אישור";
+    ok.classList.toggle("btn-danger-solid", danger);
+    ok.classList.toggle("btn-primary", !danger);
+    ok.onclick = () => { closeModal("confirm-modal"); onOk(); };
     openModal("confirm-modal");
   }
 
@@ -2587,6 +2683,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     $("#btn-json").innerHTML = "גיבוי JSON";
     $("#btn-restore").innerHTML = "שחזור מ-JSON";
     $("#btn-settings").innerHTML = ICONS.settings + " הגדרות";
+    $("#btn-delete-all").innerHTML = ICONS.trash + " מחק הכל";
     const searchIcon = $(".search span");
     if (searchIcon) searchIcon.innerHTML = ICONS.search;
   }
@@ -2658,6 +2755,8 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       render();
     });
 
+    $("#btn-delete-all").addEventListener("click", deleteAll);
+    $("#btn-delete-all-side").addEventListener("click", deleteAll);
     $("#btn-settings").addEventListener("click", () => {
       $("#setting-min").value = state.settings.defaultMinQty;
       openModal("settings-modal");
@@ -2677,20 +2776,22 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     document.addEventListener("click", () => $("#more-menu").classList.remove("open"));
 
     $("#cat-list").addEventListener("click", (e) => {
-      const ren = e.target.closest(".btn-rename-cat");
-      if (ren) { e.preventDefault(); e.stopPropagation(); renameCategory(ren.dataset.cat); return; }
-      const del = e.target.closest(".btn-del-cat");
-      if (del) { e.preventDefault(); e.stopPropagation(); deleteCategory(del.dataset.cat); return; }
+      if (e.target.closest(".btn-rename-cat, .btn-del-cat")) return;
       const btn = e.target.closest("[data-cat]");
       if (btn) { state.ui.selectedCategory = btn.dataset.cat; render(); }
     });
     $("#cat-chips").addEventListener("click", (e) => {
+      if (e.target.closest(".btn-del-cat")) return;
       if (e.target.closest("#chip-add-cat")) { addCategory(); return; }
       const btn = e.target.closest("[data-cat]");
       if (btn) { state.ui.selectedCategory = btn.dataset.cat; render(); }
     });
 
     document.body.addEventListener("click", (e) => {
+      const ren = e.target.closest(".btn-rename-cat");
+      if (ren) { e.preventDefault(); renameCategory(ren.dataset.cat); return; }
+      const delCat = e.target.closest(".btn-del-cat");
+      if (delCat) { e.preventDefault(); deleteCategory(delCat.dataset.cat); return; }
       const act = e.target.closest("[data-act]");
       if (!act) return;
       const id = act.dataset.id;
