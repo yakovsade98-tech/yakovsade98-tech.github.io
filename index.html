@@ -1860,6 +1860,31 @@ div.fld.iss-add-item { display: flex; flex-direction: column; gap: 6px; font-siz
   .iss-chosen { min-height: 44px; font-size: 14px; }
 }
 
+/* v6: מצב צופה / עורך */
+.mode-badge { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px; border-radius: 999px; font: inherit; font-size: 12px; font-weight: 700; white-space: nowrap; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--ink-2); }
+.mode-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+.mode-badge.is-editor { background: var(--gold-soft); border-color: transparent; color: var(--gold-ink); }
+.mode-badge.is-editor::before { background: var(--gold); }
+.mode-badge:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+body:not(.cloud) .mode-badge, body:not(.cloud) .drawer-mode { display: none !important; }
+.drawer-mode { padding: 12px 16px 14px; border-bottom: 1px solid var(--line); background: var(--surface-2); }
+.dm-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; min-width: 0; }
+.dm-row .mode-badge { cursor: default; flex: 0 0 auto; }
+.dm-txt { font-size: 13px; color: var(--muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.drawer-mode .btn { width: 100%; justify-content: center; }
+.drawer-mode .btn svg { width: 16px; height: 16px; margin-left: 6px; }
+.pw-wrap { position: relative; display: block; }
+.pw-wrap input { width: 100%; padding-left: 56px; }
+.pw-toggle { position: absolute; top: 50%; left: 6px; -webkit-transform: translateY(-50%); transform: translateY(-50%); border: 0; background: transparent; color: var(--gold-ink); font: inherit; font-size: 12px; font-weight: 600; padding: 6px 8px; cursor: pointer; border-radius: 4px; }
+.pw-toggle:hover { background: var(--surface-2); }
+#login-modal .v2-errors { margin: 0 0 12px; }
+#login-submit[disabled] { opacity: .65; cursor: wait; }
+@media (max-width: 860px) {
+  .mode-badge { height: 26px; padding: 0 8px; font-size: 11.5px; }
+  #login-password { font-size: 16px; }
+}
+
 /* ---------------- הדפסה ---------------- */
 .print-root { display: none; }
 @media print {
@@ -2007,6 +2032,7 @@ body.drawer-lock { overflow: hidden; }
         <h1>ניהול מלאי יובלים</h1>
       </div>
       <div class="header-actions">
+        <button type="button" class="mode-badge cloud-only" id="mode-badge" title="מצב צפייה" aria-label="מצב צפייה. לחצו לכניסה כעורך">צופה</button>
         <span class="sync-pill cloud-only" id="sync-pill" title=""><span class="txt" id="sync-text">טוען…</span></span>
         <button class="btn btn-outline hide-sm edit-only" id="btn-import" type="button"></button>
         <button class="btn btn-outline hide-sm edit-only" id="btn-import-img" type="button"></button>
@@ -2021,7 +2047,7 @@ body.drawer-lock { overflow: hidden; }
             <button type="button" id="btn-export-m"></button>
             <button type="button" id="btn-export-cat-m"></button>
             <button type="button" id="btn-order-m">רשימת הזמנה</button>
-            <button type="button" id="btn-history-m" class="edit-only">היסטוריית שינויים</button>
+            <button type="button" id="btn-history-m">היסטוריית שינויים</button>
             <button type="button" id="btn-count-m" class="edit-only">ספירת מלאי</button>
             <button type="button" id="btn-issue-m" class="edit-only">הנפקה חדשה</button>
             <button type="button" id="btn-tx-m">הנפקות והחזרות</button>
@@ -2031,7 +2057,7 @@ body.drawer-lock { overflow: hidden; }
             <button type="button" id="btn-json"></button>
             <button type="button" id="btn-restore" class="edit-only"></button>
             <button type="button" id="btn-settings" class="edit-only"></button>
-            <button type="button" id="btn-editor-name" class="cloud-only">שם העורך</button>
+            <button type="button" id="btn-editor-name" class="cloud-only edit-only">שם העורך</button>
             <button type="button" id="btn-delete-all" class="danger-item edit-only"></button>
           </div>
         </div>
@@ -2108,7 +2134,7 @@ body.drawer-lock { overflow: hidden; }
           <div class="toolbar-filters">
           <button class="chip" id="chip-low" type="button">הצג רק נמוכים</button>
           <button class="chip" id="chip-order" type="button">רשימת הזמנה <span class="cnt"></span></button>
-          <button class="chip edit-only" id="chip-history" type="button">היסטוריה</button>
+          <button class="chip" id="chip-history" type="button">היסטוריה</button>
           <button class="chip edit-only" id="chip-count" type="button">ספירת מלאי</button>
           <select id="status-filter" class="status-select" aria-label="סינון לפי סטטוס">
             <option value="">כל הסטטוסים</option>
@@ -2299,6 +2325,25 @@ body.drawer-lock { overflow: hidden; }
     </div>
   </div>
 
+  <!-- v6: editor login -->
+  <div class="overlay" id="login-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="login-title" style="max-width:420px">
+      <h2 id="login-title">כניסה כעורך</h2>
+      <p class="lead" id="login-lead">עורך יכול להוסיף ולערוך פריטים, לשנות כמויות, להנפיק ולהחזיר ציוד. הסיסמה נשמרת בטלפון הזה, כך שלא צריך להקליד אותה בכל כניסה.</p>
+      <form id="login-form" autocomplete="on">
+        <input type="text" name="username" value="עורך מלאי יובלים" autocomplete="username" hidden />
+        <div class="v2-errors" id="login-error" role="alert"></div>
+        <label class="fld"><span>סיסמת עורך</span>
+          <span class="pw-wrap"><input id="login-password" type="password" autocomplete="current-password" maxlength="200" placeholder="הקלידו את הסיסמה" />
+          <button type="button" class="pw-toggle" id="login-show" aria-label="הצגת הסיסמה">הצג</button></span></label>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" data-close="login-modal">ביטול</button>
+          <div class="right"><button type="submit" class="btn btn-primary" id="login-submit">כניסה</button></div>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Order list -->
   <div class="overlay" id="order-modal">
     <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="order-title">
@@ -2324,7 +2369,7 @@ body.drawer-lock { overflow: hidden; }
     <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="history-title">
       <h2 id="history-title">היסטוריית שינויים</h2>
       <p class="lead" id="history-lead">כל שינוי במלאי נרשם: מתי, מי, באיזה פריט ומה השתנה.</p>
-      <div class="hist-me"><span>נרשם בשם:</span><input id="hist-me" type="text" maxlength="40" placeholder="ללא שם" /></div>
+      <div class="hist-me edit-only"><span>נרשם בשם:</span><input id="hist-me" type="text" maxlength="40" placeholder="ללא שם" /></div>
       <div class="hist-filters">
         <label class="fld"><span>חיפוש (פריט, מק״ט, עורך)</span><input id="hist-q" type="search" placeholder="חיפוש…" autocomplete="off" /></label>
         <label class="fld"><span>פריט</span><select id="hist-item"></select></label>
@@ -2693,6 +2738,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   const LEGACY_KEY = "yuvalimInventory.localBeforeCloud"; // data that existed only on this device before the cloud
   const EDITOR_KEY = "yuvalimInventory.editorName";      // optional editor name shown in the change history
   const EDITOR_ASKED_KEY = "yuvalimInventory.editorAsked"; // asked once for the optional editor name
+  const TOKEN_KEY = "yuvalimInventory.editorToken";       // v6: editor token from the server (no password is stored)
   const LOCAL_HIST_KEY = "yuvalimInventory.localHistory" + (DEMO_MODE ? ".demo" : ""); // change history when there is no backend
   const HISTORY_LIMIT = 500;
   const CLOUD = !!BACKEND_URL && !DEMO_MODE;
@@ -3005,6 +3051,8 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   const histState = { server: null, loadedAt: 0, loading: null, error: "" };
   let editorName = "";
   try { editorName = localStore.getItem(EDITOR_KEY) || ""; } catch (e) {}
+  let editorToken = "";
+  try { editorToken = localStore.getItem(TOKEN_KEY) || ""; } catch (e) {}
   let quickCacheTimer = null;
   let idleRenderTimer = null;
   let holdState = null;
@@ -3078,6 +3126,12 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
 
   // Every data mutation calls persist(): cache locally and (in cloud mode) push to the server.
   function persist() {
+    if (CLOUD && !canEdit()) {
+      // צופה: שום דבר לא נשלח לשרת. מחזירים את הנתונים מהשרת ומציעים כניסה כעורך.
+      promptEditorLogin();
+      fetchRemote(true);
+      return;
+    }
     writeCache();
     if (!CLOUD) return;
     sync.dirty = true;
@@ -3096,11 +3150,121 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     };
   }
 
-  function canEdit() { return true; }
+  // v6: בענן — עריכה רק עם אסימון עורך מהשרת (השרת בודק אותו בכל שמירה). מצב מקומי/הדגמה — הכול מותר.
+  function canEdit() { return !CLOUD || !!editorToken; }
 
   function requireEdit() {
     if (canEdit()) return true;
+    promptEditorLogin();
     return false;
+  }
+
+  /* ------------ v6: צופה / עורך ------------ */
+  let loginBusy = false;
+  let loginReasonText = "";
+  function setEditorToken(t) {
+    editorToken = t || "";
+    try { if (editorToken) localStore.setItem(TOKEN_KEY, editorToken); else localStore.removeItem(TOKEN_KEY); } catch (e) {}
+    setSyncStatus();
+    render();
+  }
+  function promptEditorLogin(msg) {
+    openLoginModal(msg || "הפעולה הזו זמינה רק לעורכים. כדי לשנות את המלאי, היכנסו עם סיסמת העורך.");
+  }
+  function openLoginModal(reason) {
+    if (!CLOUD) return;
+    if (typeof closeDrawer === "function") closeDrawer();
+    if ($("#login-modal").classList.contains("open")) return;
+    $$(".overlay.open").forEach((el) => { if (el.id !== "name-modal") el.classList.remove("open"); });
+    loginReasonText = reason || "";
+    const lead = $("#login-lead");
+    lead.textContent = reason || "עורך יכול להוסיף ולערוך פריטים, לשנות כמויות, להנפיק ולהחזיר ציוד. הסיסמה נשמרת בטלפון הזה, כך שלא צריך להקליד אותה בכל כניסה.";
+    lead.classList.toggle("login-reason", !!reason);
+    const err = $("#login-error");
+    err.textContent = ""; err.classList.remove("show");
+    const inp = $("#login-password");
+    inp.value = ""; inp.type = "password";
+    $("#login-show").textContent = "הצג";
+    openModal("login-modal");
+    setTimeout(() => inp.focus(), 40);
+  }
+  function loginError(msg) {
+    const err = $("#login-error");
+    err.textContent = msg; err.classList.add("show");
+  }
+  async function submitLogin() {
+    if (loginBusy) return;
+    const inp = $("#login-password");
+    const pw = inp.value;
+    if (!pw) { loginError("נא להקליד את סיסמת העורך"); inp.focus(); return; }
+    loginBusy = true;
+    const btn = $("#login-submit");
+    btn.disabled = true; btn.textContent = "בודק…";
+    let resp = null;
+    try { resp = await apiPost({ action: "login", password: pw }); } catch (e) { resp = null; }
+    loginBusy = false;
+    btn.disabled = false; btn.textContent = "כניסה";
+    if (!resp) { loginError("אין חיבור לשרת. בדקו את החיבור לאינטרנט ונסו שוב."); return; }
+    if (resp.ok && resp.token) {
+      inp.value = "";
+      closeModal("login-modal");
+      setEditorToken(resp.token);
+      showToast("נכנסת כעורך. אפשר לערוך את המלאי.");
+      // תנועות שחיכו לשמירה (אם יש) יישמרו עכשיו; טוענים גרסה עדכנית
+      fetchRemote(true);
+      if (!validEditorName(editorName)) setTimeout(() => openNameModal(true), 60);
+      return;
+    }
+    inp.select();
+    if (resp.error === "wrong_password") {
+      const left = Number(resp.remaining);
+      loginError("הסיסמה שגויה. נסו שוב." + (left > 0 && left <= 3 ? " (נשארו " + left + " ניסיונות לפני חסימה זמנית)" : ""));
+    } else if (resp.error === "locked") {
+      const min = Math.max(1, Math.ceil((Number(resp.retryAfter) || 600) / 60));
+      loginError("יותר מדי ניסיונות כושלים. אפשר לנסות שוב בעוד " + min + " דקות.");
+    } else if (resp.error === "not_configured") {
+      loginError("עוד לא הוגדרה סיסמת עורך בשרת.");
+    } else {
+      loginError("הכניסה נכשלה. רעננו את הדף ונסו שוב.");
+    }
+  }
+  function logoutEditor() {
+    if (sync.dirty || sync.saving) { showToast("יש שינויים שעוד נשמרים. נסו שוב בעוד רגע."); return; }
+    confirmModal("יציאה ממצב עורך", "אחרי היציאה הטלפון הזה יחזור למצב צפייה בלבד. כדי לערוך שוב תצטרכו את סיסמת העורך.", "יציאה", () => {
+      setEditorToken("");
+      showToast("יצאת ממצב עורך. מעכשיו צפייה בלבד.");
+    });
+  }
+  // בטעינה: אם הסיסמה הוחלפה, האסימון השמור כבר לא תקף — חוזרים לצופה
+  async function verifyEditorToken() {
+    if (!CLOUD || !editorToken) return;
+    const t = editorToken;
+    let resp = null;
+    try { resp = await apiPost({ action: "auth", token: t }); } catch (e) { return; }
+    if (resp && resp.ok && resp.editor === false && editorToken === t) {
+      setEditorToken("");
+      showToast("סיסמת העורך הוחלפה. הטלפון חזר למצב צפייה, אפשר להיכנס שוב כעורך.");
+    }
+  }
+  function renderMode() {
+    if (!CLOUD) return;
+    const ed = canEdit();
+    const b = $("#mode-badge");
+    if (b) {
+      b.textContent = ed ? "עורך" : "צופה";
+      b.classList.toggle("is-editor", ed);
+      b.title = ed ? "מצב עורך" + (editorName ? " · " + editorName : "") : "מצב צפייה. לחצו לכניסה כעורך";
+      b.setAttribute("aria-label", ed ? "מצב עורך. לחצו לפתיחת התפריט" : "מצב צפייה. לחצו לכניסה כעורך");
+    }
+    const dm = $("#drawer-mode");
+    if (dm) {
+      const chip = dm.querySelector(".mode-badge");
+      chip.textContent = ed ? "עורך" : "צופה";
+      chip.classList.toggle("is-editor", ed);
+      dm.querySelector(".dm-txt").textContent = ed ? (editorName ? "מחובר בשם " + editorName : "אפשר לערוך את המלאי") : "צפייה בלבד, בלי שינויים";
+      $("#btn-login").style.display = ed ? "none" : "";
+      $("#btn-logout").style.display = ed ? "" : "none";
+    }
   }
 
   function fetchWithTimeout(url, opts, ms) {
@@ -3190,7 +3354,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     ensureCategoryList();
     sync.cacheFromCloud = true;
     // תנועות (הנפקה/החזרה) שעוד לא נשמרו בשרת מוחלות מחדש על הגרסה העדכנית, עם בדיקת מלאי
-    replayPendingTx();
+    if (canEdit()) replayPendingTx(); else lastReplay = { replayed: 0, failed: [] };
     if (lastReplay.replayed && CLOUD) { sync.dirty = true; scheduleSave(SAVE_DEBOUNCE_MS); }
     writeCache();
   }
@@ -3246,7 +3410,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     const sentHist = pendingHistory.splice(0, pendingHistory.length);
     const sentTx = pendingTxIds();
     try {
-      const body = { action: "save", baseVersion: sync.version, data: sharedPayload() };
+      const body = { action: "save", baseVersion: sync.version, data: sharedPayload(), token: editorToken };
       if (sentHist.length) body.history = sentHist;
       resp = await apiPost(body);
     } catch (e) {
@@ -3273,6 +3437,16 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       writeCache();
       if (sync.dirty) scheduleSave(SAVE_DEBOUNCE_MS);
       refreshOpenHistoryViews();
+    } else if (resp && (resp.error === "unauthorized" || resp.error === "not_configured")) {
+      // v6: השרת סירב (אין אסימון / הסיסמה הוחלפה). שום דבר לא נשמר — חוזרים לצופה ולגרסת השרת.
+      // תנועות הנפקה/החזרה שלא נשמרו נשארות במכשיר ויישמרו אחרי כניסה מחדש כעורך.
+      pendingHistory = [];
+      sync.dirty = false;
+      if (countApply) countApply = null;
+      editorToken = "";
+      try { localStore.removeItem(TOKEN_KEY); } catch (e) {}
+      fetchRemote(true);
+      promptEditorLogin("השינוי האחרון לא נשמר: אין הרשאת עריכה (ייתכן שסיסמת העורך הוחלפה). היכנסו שוב כעורך ובצעו את השינוי מחדש.");
     } else if (resp && resp.error === "busy") {
       pendingHistory = sentHist.concat(pendingHistory);
       sync.dirty = true;
@@ -3308,6 +3482,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   function setSyncStatus() {
     document.body.classList.toggle("cloud", CLOUD);
     document.body.classList.toggle("readonly", !canEdit());
+    renderMode();
     if (!CLOUD) return;
     const pill = $("#sync-pill");
     const txt = $("#sync-text");
@@ -3385,6 +3560,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
 
   function maybeAskEditorName() {
     if (!CLOUD) return;
+    if (!canEdit()) return;   // v6: צופה לא צריך שם; השם נשאל בכניסה כעורך
     if ($("#name-modal") && $("#name-modal").classList.contains("open")) return;
     // השם חובה: גם מי שכבר נשאל ודילג (asked=1 בלי שם) יתבקש שוב
     if (validEditorName(editorName)) { markEditorAsked(); return; }
@@ -3392,6 +3568,8 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   function afterCloudReady() {
+    verifyEditorToken();
+    if (!canEdit()) return;   // v6: צופה — בלי העלאת נתונים מקומיים ובלי בקשת שם
     offerLegacyUpload();
     const wait = () => {
       if ($("#confirm-modal") && $("#confirm-modal").classList.contains("open")) setTimeout(wait, 300);
@@ -4167,7 +4345,6 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   async function openHistory(itemKey) {
-    if (!requireEdit()) return;
     $("#hist-me").value = editorName || "";
     if (itemKey !== undefined) {
       $("#hist-q").value = ""; $("#hist-from").value = ""; $("#hist-to").value = ""; $("#hist-action").value = "";
@@ -6476,7 +6653,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   const Auth = {
     // המשתמש הנוכחי. בעתיד: { id, name, role } מהשרת.
     currentUser() {
-      return { id: "", name: editorName || "", role: "editor", authenticated: false };
+      return { id: "", name: editorName || "", role: canEdit() ? "editor" : "viewer", authenticated: !!editorToken };
     },
     // שם המבצע שנרשם ביומן הפעולות
     actorName() {
@@ -6486,7 +6663,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     // כרגע הכול מותר (canEdit() של האפליקציה מחזיר true). בעתיד: לפי role.
     can(action) {
       if (action === "view") return true;
-      return canEdit();
+      return requireEdit();
     },
     // בעתיד: לצרף כותרת Authorization לכל בקשה לשרת (ראו apiPost/apiGet)
     authHeaders() { return {}; }
@@ -7766,6 +7943,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   function openDrawer() {
     const d = $("#drawer");
     if (!d) return;
+    renderMode();
     refreshDrawerGroups();
     // כל פתיחה מתחילה מקבוצות סגורות — תמונה צפויה וקצרה
     Array.prototype.forEach.call(d.querySelectorAll(".dg"), (g) => toggleDrawerGroup(g.getAttribute("data-group"), false));
@@ -7824,6 +8002,17 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       "</nav>";
     document.body.appendChild(d);
     const body = d.querySelector("#drawer-body");
+    // v6: מצב צופה / עורך + כניסה / יציאה
+    const LOCK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+    const EXIT_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>';
+    const dm = document.createElement("div");
+    dm.className = "drawer-mode"; dm.id = "drawer-mode";
+    dm.innerHTML = '<div class="dm-row"><span class="mode-badge">צופה</span><span class="dm-txt"></span></div>' +
+      '<button type="button" class="btn btn-primary" id="btn-login">' + LOCK_SVG + "כניסה כעורך</button>" +
+      '<button type="button" class="btn btn-outline" id="btn-logout">' + EXIT_SVG + "יציאה ממצב עורך</button>";
+    body.appendChild(dm);
+    dm.querySelector("#btn-login").addEventListener("click", (e) => { e.stopPropagation(); closeDrawer(); openLoginModal(); });
+    dm.querySelector("#btn-logout").addEventListener("click", (e) => { e.stopPropagation(); closeDrawer(); logoutEditor(); });
     DRAWER_GROUPS.forEach((grp) => {
       const g = document.createElement("section");
       g.className = "dg"; g.setAttribute("data-group", grp.key);
@@ -7881,6 +8070,21 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   function v2Init() {
     setupDemoMode();
     setupDrawer();
+    // v6: כניסה כעורך
+    $("#login-form").addEventListener("submit", (e) => { e.preventDefault(); submitLogin(); });
+    $("#login-show").addEventListener("click", () => {
+      const inp = $("#login-password");
+      const show = inp.type === "password";
+      inp.type = show ? "text" : "password";
+      $("#login-show").textContent = show ? "הסתר" : "הצג";
+      $("#login-show").setAttribute("aria-label", show ? "הסתרת הסיסמה" : "הצגת הסיסמה");
+      inp.focus();
+    });
+    $("#mode-badge").addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (canEdit()) openDrawer(); else openLoginModal();
+    });
+    renderMode();
     sigPad = SignaturePad($("#iss-sig"));
     sigPad.onChange(() => { $("#iss-sig-ph").hidden = !sigPad.isEmpty(); });
     $("#iss-sig-clear").addEventListener("click", () => sigPad.clear());
@@ -7959,6 +8163,11 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       const b = e.target.closest(".dash-item");
       if (!b) return;
       closeModal("dash-modal");
+      if (!canEdit()) {
+        const it = state.items.find((x) => x.id === b.dataset.id);
+        if (it) { state.ui.selectedCategory = "__all__"; $("#search-input").value = it.name; $("#search-input").dispatchEvent(new Event("input", { bubbles: true })); }
+        return;
+      }
       openItemModal(b.dataset.id);
     });
 
