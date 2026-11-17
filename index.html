@@ -1187,6 +1187,12 @@ body.counting .fab { display: none !important; }
 .conn-banner[hidden] { display: none; }
 .conn-banner > span { flex: 1 1 220px; }
 .conn-banner .nowrap { white-space: nowrap; font-family: ui-monospace, monospace; font-size: 12px; }
+body.no-data-yet .main > :not(#conn-banner):not(#conn-loading) { display: none !important; }
+body.no-data-yet #fab-add { display: none !important; }
+body.no-data-yet .conn-banner > span { flex: 0 0 auto; }
+body.no-data-yet .conn-banner { flex-direction: column; align-items: stretch; text-align: center; margin-top: 28px; padding: 24px 18px; font-size: 16px; }
+.conn-loading { text-align: center; color: var(--muted); padding: 56px 16px; font-size: 15px; }
+.conn-loading[hidden] { display: none; }
 </style>
 </head>
 <body>
@@ -1242,6 +1248,7 @@ body.counting .fab { display: none !important; }
       </aside>
 
       <main class="main">
+        <div class="conn-loading" id="conn-loading" hidden>טוען את המלאי מהשרת…</div>
         <div class="conn-banner" id="conn-banner" role="alert" hidden>
           <span id="conn-banner-text">לא ניתן לטעון את המלאי מהשרת.</span>
           <button class="btn btn-outline" type="button" id="conn-retry">נסה שוב</button>
@@ -1688,6 +1695,9 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   /* ===== כתובת השרת (Cloudflare Worker) =====
      ריק = מצב מקומי בלבד (עריכה חופשית, שמירה בדפדפן בלבד). */
   const BACKEND_URL = "https://yuvalim-inventory.yuvalim.workers.dev";
+  /* Same backend through another domain, used automatically when the first address can't be reached
+     (some phones / networks / filters block *.workers.dev). Empty = no fallback. */
+  const ALT_BACKEND_URL = "https://yuvalim-inventory.pages.dev/api";
 
   const STORAGE_KEY = "fwYakovInventory.v1";        // local cache of the shared inventory
   const THEME_KEY = "yuvalimInventory.darkMode";    // per-device theme
@@ -1697,6 +1707,24 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   const LOCAL_HIST_KEY = "yuvalimInventory.localHistory"; // change history when there is no backend
   const HISTORY_LIMIT = 500;
   const CLOUD = !!BACKEND_URL;
+  const BACKEND_KEY = "yuvalimInventory.backendUrl";   // the address that answered last (per device)
+  const BACKENDS = (function () {
+    const list = [];
+    const add = (u) => { if (u && list.indexOf(u) < 0) list.push(u); };
+    if (!BACKEND_URL) return list;
+    try {
+      // the copy of the app on pages.dev talks to its own /api first (same origin)
+      if (ALT_BACKEND_URL && /\.pages\.dev$/i.test(location.hostname) && ALT_BACKEND_URL.indexOf(location.origin + "/") === 0) add(ALT_BACKEND_URL);
+    } catch (e) {}
+    add(BACKEND_URL);
+    add(ALT_BACKEND_URL);
+    return list;
+  })();
+  let activeBackend = BACKENDS[0] || "";
+  try {
+    const savedBackend = localStore.getItem(BACKEND_KEY);
+    if (savedBackend && BACKENDS.indexOf(savedBackend) >= 0) activeBackend = savedBackend;
+  } catch (e) {}
   const POLL_MS = 30000;
   const SAVE_DEBOUNCE_MS = 700;
   const UNCATEGORIZED = "ללא קטגוריה";
@@ -2073,31 +2101,66 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     return false;
   }
 
-  async function apiGet() {
-    const url = BACKEND_URL + (BACKEND_URL.includes("?") ? "&" : "?") + "action=get&t=" + Date.now();
-    const opts = { method: "GET", cache: "no-store", redirect: "follow" };
+  function fetchWithTimeout(url, opts, ms) {
     let timer = null;
     if (typeof AbortController !== "undefined") {
       const ctl = new AbortController();
       opts.signal = ctl.signal;
-      timer = setTimeout(() => ctl.abort(), 15000);
+      timer = setTimeout(() => ctl.abort(), ms);
     }
-    let res;
-    try { res = await fetch(url, opts); } finally { clearTimeout(timer); }
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    return res.json();
+    return fetch(url, opts).then(
+      (res) => { clearTimeout(timer); return res; },
+      (err) => { clearTimeout(timer); throw err; }
+    );
   }
 
-  async function apiPost(body) {
-    // text/plain avoids a CORS preflight, which Apps Script cannot answer
-    const res = await fetch(BACKEND_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(body),
-      redirect: "follow"
-    });
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    return res.json();
+  function backendOrder() {
+    return [activeBackend].concat(BACKENDS.filter((u) => u !== activeBackend));
+  }
+
+  function useBackend(u) {
+    if (u === activeBackend) return;
+    activeBackend = u;
+    try { localStore.setItem(BACKEND_KEY, u); } catch (e) {}
+  }
+
+  // Try the address that worked last; on a network error, timeout or a non-JSON answer
+  // (e.g. a filter's block page) try the next one. Every address reaches the same data.
+  async function callBackend(makeRequest, timeoutMs) {
+    let lastErr = null;
+    for (const base of backendOrder()) {
+      let data;
+      try {
+        const r = makeRequest(base);
+        const res = await fetchWithTimeout(r.url, r.opts, timeoutMs);
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        data = await res.json();
+        if (!data || typeof data !== "object" || typeof data.ok !== "boolean") throw new Error("bad response");
+      } catch (e) {
+        lastErr = e;
+        console.warn("backend failed: " + base, e);
+        continue;
+      }
+      useBackend(base);
+      return data;
+    }
+    throw lastErr || new Error("no backend");
+  }
+
+  function apiGet() {
+    return callBackend((base) => ({
+      url: base + (base.includes("?") ? "&" : "?") + "action=get&t=" + Date.now(),
+      opts: { method: "GET", cache: "no-store", redirect: "follow" }
+    }), 15000);
+  }
+
+  function apiPost(body) {
+    const payload = JSON.stringify(body);
+    // text/plain keeps this a "simple" request: no CORS preflight
+    return callBackend((base) => ({
+      url: base,
+      opts: { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: payload, redirect: "follow" }
+    }), 45000);
   }
 
   function applyRemote(resp) {
@@ -2242,11 +2305,15 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     const banner = $("#conn-banner");
     if (banner) {
       const show = !sync.online && !sync.loadedOnce && !sync.fetching;
+      const noData = CLOUD && !sync.loadedOnce && !state.items.length;
+      document.body.classList.toggle("no-data-yet", noData);
+      const ld = $("#conn-loading");
+      if (ld) ld.hidden = !(noData && !show);
       banner.hidden = !show;
       const bt = $("#conn-banner-text");
       if (show && bt) bt.innerHTML = state.items.length
         ? "אין חיבור לשרת המלאי. מוצג העותק האחרון שנשמר במכשיר הזה, ייתכן שהוא לא מעודכן."
-        : "לא ניתן לטעון את המלאי מהשרת. בדקו את החיבור לאינטרנט ונסו שוב. אם יש בטלפון סינון גלישה או שאתם ברשת מוגבלת, ייתכן שהכתובת <bdi dir='ltr' class='nowrap'>yuvalim-inventory.yuvalim.workers.dev</bdi> חסומה בה.";
+        : "לא ניתן להתחבר לשרת המלאי כרגע. המלאי עצמו שמור בשרת ולא נמחק. בדקו את החיבור לאינטרנט ונסו שוב. אם יש בטלפון סינון גלישה או שאתם ברשת מוגבלת, ייתכן שהגישה לשרת חסומה בה. אפשר לנסות דרך רשת אחרת, למשל וויי־פיי במקום סלולר.";
     }
     pill.className = "sync-pill cloud-only " + cls;
     txt.textContent = label;
