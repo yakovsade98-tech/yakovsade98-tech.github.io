@@ -4212,15 +4212,15 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   function orderText(lines) {
     const d = new Date();
     const date = d.getDate() + "." + (d.getMonth() + 1) + "." + d.getFullYear();
-    let t = "🛒 רשימת הזמנה — יובלים\n" + date + " · " + lines.length + " פריטים\n";
+    let t = "🛒 *רשימת הזמנה – יובלים*\n📅 " + date + " · " + lines.length + " פריטים\n━━━━━━━━━━━━\n\n";
+    let n = 0;
     for (const g of groupLines(lines)) {
-      t += "\n*" + g.cat + "*\n";
+      t += "📦 *" + g.cat + "* (" + g.lines.length + ")\n\n";
       for (const l of g.lines) {
-        t += "• " + l.it.name + (l.it.sku ? " (מק״ט " + l.it.sku + ")" : "") +
-          " — להזמין " + formatNumber(l.missing, 0) +
-          (l.cartons ? " = " + formatNumber(l.cartons, 0) + " קרטונים" : "") +
-          " · במלאי " + formatNumber(l.qty, 0) + (l.target != null ? " מתוך " + formatNumber(l.target, 0) : "") +
-          (l.status === "out" ? " · אזל" : "") + "\n";
+        n += 1;
+        t += n + ". *" + l.it.name + "*" + (l.it.sku ? " · מק״ט " + l.it.sku : "") + "\n";
+        t += "   ➕ להזמין: *" + formatNumber(l.missing, 0) + "*" + (l.cartons ? " (" + formatNumber(l.cartons, 0) + " קרטונים)" : "") + "\n";
+        t += "   📊 במלאי " + formatNumber(l.qty, 0) + (l.target != null ? " מתוך " + formatNumber(l.target, 0) : "") + (l.status === "out" ? " · 🔴 אזל" : "") + "\n\n";
       }
     }
     return t.trim();
