@@ -928,6 +928,257 @@ table.hist-table { width: 100%; border-collapse: collapse; font-size: 13px; }
   .hist-table td[data-label]::before { content: attr(data-label) ": "; color: var(--muted); font-size: 11.5px; font-weight: 600; }
   .hist-table td.ts::before { content: none; }
 }
+
+/* ===== מצב ספירת מלאי ===== */
+#chip-count.active { background: var(--ok-bg); border-color: #8FCBB0; color: var(--ok); }
+[data-theme="dark"] #chip-count.active { border-color: #2D6A4F; }
+.hist-act.a-count { background: var(--ok-bg); color: var(--ok); }
+body.counting { overflow: hidden; }
+body.counting .fab { display: none !important; }
+
+#count-modal {
+  padding: 12px;
+  background: rgba(16, 23, 34, 0.58);
+}
+#confirm-modal { z-index: 90; }
+#count-modal .count-sheet {
+  width: min(540px, 100%);
+  max-height: calc(100vh - 24px);
+  min-height: min(640px, calc(100vh - 24px));
+  display: flex;
+  flex-direction: column;
+  padding: 18px 18px 14px;
+}
+#count-modal .count-sheet h2 { font-size: 20px; }
+#count-modal .count-panel { display: none; flex: 1; flex-direction: column; min-height: 0; }
+#count-modal .count-panel.on { display: flex; }
+
+.count-resume {
+  display: none;
+  background: var(--warn-bg);
+  border: 1px solid #F0C48A;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  font-size: 13.5px;
+}
+.count-resume.show { display: block; }
+.count-resume p { margin: 0 0 10px; font-weight: 650; }
+.count-resume .resume-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.count-scope { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.count-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-weight: 650;
+  font-size: 14px;
+  cursor: pointer;
+}
+.count-opt:has(input:checked) {
+  border-color: var(--gold);
+  background: var(--gold-soft);
+}
+.count-opt input { accent-color: var(--gold); }
+.count-opt select {
+  margin-right: auto;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-weight: 600;
+  min-width: 140px;
+  max-width: 100%;
+}
+.count-opt select:disabled { opacity: .5; }
+.count-scope-n {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--surface-2);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+.count-order-note { font-size: 12.5px; color: var(--muted); margin-bottom: 8px; }
+
+.count-progress { margin-bottom: 14px; }
+.count-progress-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.count-progress-top .meta { color: var(--muted); font-weight: 600; }
+.count-progress-track {
+  height: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.count-progress-bar {
+  height: 100%;
+  width: 0;
+  background: var(--gold);
+  transition: width .2s ease;
+}
+
+.count-item-head { text-align: center; margin: 6px 0 12px; }
+.count-item-name {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  word-break: break-word;
+}
+.count-item-meta {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 10px;
+  color: var(--muted);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.count-item-meta span {
+  background: var(--surface-2);
+  border-radius: 999px;
+  padding: 2px 9px;
+}
+.count-recorded {
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+.count-recorded b { color: var(--ink); font-size: 16px; }
+
+#count-qty {
+  width: 100%;
+  font-size: 44px;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  border: 2px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  border-radius: 16px;
+  padding: 14px 12px;
+  outline: none;
+  direction: ltr;
+}
+#count-qty:focus { border-color: var(--gold); box-shadow: var(--focus); background: var(--surface); }
+
+.count-carton {
+  display: none;
+  margin-top: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+}
+.count-carton.show { display: block; }
+.count-carton-label { font-size: 12.5px; font-weight: 700; color: var(--muted); margin-bottom: 8px; }
+.count-carton-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 8px 10px;
+  min-width: 0;
+}
+.count-carton-row label.fld { flex: 1 1 100px; min-width: 0; }
+.count-carton-row input { width: 100%; min-width: 0; max-width: 100%; }
+.count-carton-row .times {
+  font-weight: 700;
+  padding-bottom: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.count-carton-sum { margin-top: 8px; font-size: 14px; color: var(--muted); }
+.count-carton-sum b { color: var(--ink); font-size: 16px; }
+
+.count-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.count-nav .btn { min-height: 44px; flex: 1 1 calc(33.33% - 8px); min-width: 0; }
+.count-nav .btn-primary { flex: 1 1 100%; font-size: 16px; min-height: 48px; }
+
+@media (max-width: 860px) {
+  .count-carton-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: end;
+    gap: 8px;
+  }
+  .count-carton-row label.fld { flex: none; }
+  .count-carton-row .times { padding-bottom: 10px; text-align: center; }
+}
+
+.count-summary-lead { margin-bottom: 10px; }
+.count-summary-list { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+.cnt-diff, .cnt-skip {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  background: var(--surface-2);
+}
+.cnt-diff .cd-name, .cnt-skip .cd-name { font-weight: 700; }
+.cnt-diff .cd-sku, .cnt-skip .cd-sku { color: var(--muted); font-weight: 500; font-size: 12.5px; margin-right: 6px; }
+.cnt-diff .cd-nums {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 6px;
+  font-size: 13.5px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.cnt-diff .cd-nums b { color: var(--ink); }
+.cnt-diff.gap-down { border-color: #E8B0AB; background: var(--danger-bg); }
+.cnt-diff.gap-up { border-color: #8FCBB0; background: var(--ok-bg); }
+.cnt-diff.gap-down .cd-gap b { color: var(--danger); font-size: 15px; }
+.cnt-diff.gap-up .cd-gap b { color: var(--ok); font-size: 15px; }
+.count-skip-title, .count-same-note {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  margin: 14px 0 8px;
+}
+.count-empty-sum { text-align: center; padding: 28px 10px; color: var(--muted); font-weight: 600; }
+
+#count-modal .modal-actions { margin-top: auto; position: static; }
+#count-apply { min-height: 44px; }
+
+@media (max-width: 860px) {
+  #count-modal { padding: 0; align-items: stretch; }
+  #count-modal .count-sheet {
+    width: 100%;
+    max-width: 100%;
+    min-height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+    border: 0;
+    padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+  .count-item-name { font-size: 26px; }
+  #count-qty { font-size: 40px; }
+}
+
 </style>
 </head>
 <body>
@@ -958,6 +1209,7 @@ table.hist-table { width: 100%; border-collapse: collapse; font-size: 13px; }
             <button type="button" id="btn-export-cat-m"></button>
             <button type="button" id="btn-order-m">🛒 רשימת הזמנה</button>
             <button type="button" id="btn-history-m" class="edit-only">🕘 היסטוריית שינויים</button>
+            <button type="button" id="btn-count-m" class="edit-only">📋 ספירת מלאי</button>
             <button type="button" id="btn-json"></button>
             <button type="button" id="btn-restore" class="edit-only"></button>
             <button type="button" id="btn-settings" class="edit-only"></button>
@@ -1025,6 +1277,7 @@ table.hist-table { width: 100%; border-collapse: collapse; font-size: 13px; }
           <button class="chip" id="chip-low" type="button">הצג רק נמוכים</button>
           <button class="chip" id="chip-order" type="button">🛒 רשימת הזמנה <span class="cnt"></span></button>
           <button class="chip edit-only" id="chip-history" type="button">🕘 היסטוריה</button>
+          <button class="chip edit-only" id="chip-count" type="button">📋 ספירת מלאי</button>
           <select id="status-filter" class="status-select" aria-label="סינון לפי סטטוס">
             <option value="">כל הסטטוסים</option>
             <option value="full">גבוה/מלא</option>
@@ -1273,6 +1526,88 @@ table.hist-table { width: 100%; border-collapse: collapse; font-size: 13px; }
       </div>
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" data-close="qty-modal">סגירה</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Stock count -->
+  <div class="overlay" id="count-modal" data-locked="1">
+    <div class="modal count-sheet" role="dialog" aria-modal="true" aria-labelledby="count-title">
+      <div class="count-panel on" id="count-panel-start">
+        <h2 id="count-title">ספירת מלאי</h2>
+        <p class="lead">מעבר פריט אחרי פריט. מקלידים את הכמות שנספרה ועוברים הלאה. בסוף מוצגים הפערים, ואז מאשרים עדכון של המלאי בבת אחת.</p>
+        <div class="count-resume" id="count-resume">
+          <p id="count-resume-msg"></p>
+          <div class="resume-actions">
+            <button type="button" class="btn btn-primary" id="count-resume-btn">המשך ספירה</button>
+            <button type="button" class="btn btn-outline" id="count-resume-new">ספירה חדשה</button>
+          </div>
+        </div>
+        <div id="count-start-form">
+          <div class="count-scope" id="count-scope"></div>
+          <div class="count-scope-n" id="count-scope-n">0 פריטים בספירה</div>
+          <p class="count-order-note">הסדר: מכולה, אחר כך קטגוריה, אחר כך שם הפריט.</p>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" data-close="count-modal">סגירה</button>
+          <div class="right">
+            <button type="button" class="btn btn-primary" id="count-start">התחלת ספירה</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="count-panel" id="count-panel-item">
+        <div class="count-progress">
+          <div class="count-progress-top">
+            <span id="count-progress-label">0 מתוך 0</span>
+            <span class="meta" id="count-progress-meta"></span>
+          </div>
+          <div class="count-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="count-progress-track">
+            <div class="count-progress-bar" id="count-progress-bar"></div>
+          </div>
+        </div>
+        <div class="count-item-head">
+          <div class="count-item-name" id="count-item-name"></div>
+          <div class="count-item-meta" id="count-item-meta"></div>
+        </div>
+        <div class="count-recorded" id="count-recorded"></div>
+        <input id="count-qty" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="next" aria-label="כמות שנספרה" />
+        <div class="count-carton" id="count-carton">
+          <div class="count-carton-label" id="count-carton-label">הקלדה לפי קרטונים</div>
+          <div class="count-carton-row">
+            <label class="fld"><span>קרטונים</span><input id="count-cartons" type="text" inputmode="numeric" autocomplete="off" /></label>
+            <span class="times">× <span id="count-per-carton">0</span></span>
+            <label class="fld"><span>ועוד יחידות</span><input id="count-loose" type="text" inputmode="numeric" autocomplete="off" /></label>
+          </div>
+          <div class="count-carton-sum">סה״כ: <b id="count-carton-sum">0</b></div>
+        </div>
+        <div class="count-nav">
+          <button type="button" class="btn btn-outline" id="count-prev">הקודם</button>
+          <button type="button" class="btn btn-outline" id="count-skip">דלג</button>
+          <button type="button" class="btn btn-outline" id="count-same">זהה לרשום</button>
+          <button type="button" class="btn btn-primary" id="count-next">הבא</button>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" id="count-pause">השהה</button>
+          <div class="right">
+            <button type="button" class="btn btn-outline" id="count-to-summary">לסיכום</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="count-panel" id="count-panel-summary">
+        <h2 id="count-sum-title">סיכום ספירה</h2>
+        <p class="lead count-summary-lead" id="count-sum-lead"></p>
+        <div class="count-summary-list" id="count-sum-body"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" id="count-cancel">ביטול הספירה</button>
+          <div class="right">
+            <button type="button" class="btn btn-outline" id="count-back">חזרה לספירה</button>
+            <button type="button" class="btn btn-outline" id="count-export">ייצוא לאקסל</button>
+            <button type="button" class="btn btn-primary" id="count-apply">אישור ועדכון המלאי</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1760,6 +2095,8 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   async function fetchRemote(force) {
     if (!CLOUD || sync.fetching) return;
     if (!force && (sync.dirty || sync.saving)) return;
+    if (!force && countApply) return;
+    if (!force && $("#count-modal") && $("#count-modal").classList.contains("open")) return;
     sync.fetching = true;
     try {
       const resp = await apiGet();
@@ -1822,6 +2159,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
         sentHistory = sentHist.concat(sentHistory).slice(0, HISTORY_LIMIT);
         if (resp.historySaved == null) histState.error = "old_backend";
       }
+      if (countApply) countApply = null;
       writeCache();
       if (sync.dirty) scheduleSave(SAVE_DEBOUNCE_MS);
       refreshOpenHistoryViews();
@@ -1830,11 +2168,20 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       sync.dirty = true;
       scheduleSave(1500);
     } else if (resp && resp.error === "conflict") {
-      sync.dirty = false;
       applyRemote(resp);
-      render();
       pendingHistory = [];
-      showToast("המלאי עודכן במקביל ממכשיר אחר. נטענה הגרסה העדכנית — יש לבצע שוב את השינוי האחרון.");
+      if (countApply) {
+        countApply.attempts = (countApply.attempts || 0) + 1;
+        applyCountToState(countApply.counts);
+        sync.dirty = true;
+        writeCache();
+        render();
+        scheduleSave(countApply.attempts < 5 ? 0 : 1500);
+      } else {
+        sync.dirty = false;
+        render();
+        showToast("המלאי עודכן במקביל ממכשיר אחר. נטענה הגרסה העדכנית — יש לבצע שוב את השינוי האחרון.");
+      }
     } else {
       sync.dirty = false;
       showToast("השמירה נכשלה (" + ((resp && resp.error) || "שגיאה") + "). נטען מחדש מהשרת.");
@@ -2446,7 +2793,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   /* ------------ change history ------------ */
   const HIST_ACTIONS = {
     qty: "שינוי כמות", add: "הוספה", edit: "עריכה", "delete": "מחיקה", "import": "ייבוא",
-    "delete-all": "מחיקת הכל", category: "קטגוריה", settings: "הגדרות", undo: "ביטול פעולה", restore: "שחזור"
+    "delete-all": "מחיקת הכל", category: "קטגוריה", settings: "הגדרות", undo: "ביטול פעולה", restore: "שחזור", count: "ספירת מלאי"
   };
   const FIELD_LABELS = {
     name: "שם", category: "קטגוריה", sku: "מק״ט", quantity: "כמות", price: "מחיר", supplier: "ספק",
@@ -2862,6 +3209,684 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   /* ------------ mutations ------------ */
+  /* ------------ stock count (מצב ספירה) ------------ */
+  const COUNT_KEY = "yuvalimInventory.countSession";
+  const COUNT_GROUP_HINT = /משק|מכולה|סככה|מחסן|מיקום|container|shed|warehouse/;
+  let countSession = null;
+  let countApply = null; // { counts: {id: qty}, attempts } — survives a version conflict
+  let countCartonSync = false;
+
+  function readCountSession() {
+    if (countSession) return countSession;
+    try {
+      const raw = localStorage.getItem(COUNT_KEY);
+      if (!raw) return null;
+      const s = JSON.parse(raw);
+      if (!s || !Array.isArray(s.itemIds) || !s.itemIds.length) return null;
+      countSession = s;
+      return s;
+    } catch (e) { return null; }
+  }
+  function writeCountSession() {
+    if (!countSession) {
+      try { localStorage.removeItem(COUNT_KEY); } catch (e) {}
+      return;
+    }
+    countSession.updatedAt = new Date().toISOString();
+    try { localStorage.setItem(COUNT_KEY, JSON.stringify(countSession)); } catch (e) {}
+  }
+  function clearCountSession() {
+    countSession = null;
+    try { localStorage.removeItem(COUNT_KEY); } catch (e) {}
+    updateCountChip();
+  }
+  function updateCountChip() {
+    const s = countSession || (function () { try { return JSON.parse(localStorage.getItem(COUNT_KEY) || "null"); } catch (e) { return null; } })();
+    const active = !!(s && Array.isArray(s.itemIds) && s.itemIds.length && s.phase !== "done");
+    const chip = $("#chip-count");
+    if (chip) chip.classList.toggle("active", active);
+  }
+  function setCountingUi(on) {
+    document.body.classList.toggle("counting", !!on);
+  }
+
+  function containerValueOf(it) {
+    const keys = Object.keys((it && it.custom) || {});
+    const hit = keys.find((k) => /מכולה|container/.test(headerKey(k)) || /מכולה/.test(headerCompact(k)));
+    if (hit) {
+      const v = it.custom[hit];
+      return v == null ? "" : String(v).trim();
+    }
+    return String((it && it.location) || "").trim();
+  }
+
+  function uniqueSorted(vals) {
+    return Array.from(new Set(vals.filter((v) => v !== "" && v != null))).sort((a, b) => String(a).localeCompare(String(b), "he"));
+  }
+
+  function countGroupFields() {
+    const fields = [];
+    const cats = allCategoryNames();
+    if (cats.length) fields.push({ id: "category", label: "קטגוריה", values: cats });
+    const locs = uniqueSorted(state.items.map((it) => String(it.location || "").trim()));
+    if (locs.length) fields.push({ id: "location", label: "מיקום", values: locs });
+    for (const col of state.ui.customCols) {
+      if (isCartonQuantityHeader(col) || /קרטון/.test(headerCompact(col))) continue;
+      const vals = uniqueSorted(state.items.map((it) => {
+        const v = it.custom && it.custom[col];
+        return v == null ? "" : String(v).trim();
+      }));
+      if (!vals.length) continue;
+      const hinted = COUNT_GROUP_HINT.test(headerCompact(col)) || COUNT_GROUP_HINT.test(headerKey(col));
+      if (hinted || vals.length < state.items.length) fields.push({ id: "custom:" + col, label: col, values: vals });
+    }
+    return fields;
+  }
+
+  function parseScopeFromForm() {
+    const checked = document.querySelector('#count-scope input[name="count-scope"]:checked');
+    const type = checked ? checked.value : "all";
+    if (type === "all" || !type) return { type: "all", field: "", value: "" };
+    if (type === "category") return { type: "category", field: "category", value: ($("#count-scope-category") && $("#count-scope-category").value) || "" };
+    if (type === "location") return { type: "location", field: "location", value: ($("#count-scope-location") && $("#count-scope-location").value) || "" };
+    if (type.indexOf("custom:") === 0) {
+      const field = type.slice(7);
+      const sel = $$("#count-scope select[data-custom]").find((el) => el.getAttribute("data-custom") === field);
+      return { type: "custom", field: field, value: sel ? sel.value : "" };
+    }
+    return { type: "all", field: "", value: "" };
+  }
+
+  function itemInCountScope(it, scope) {
+    if (!scope || scope.type === "all") return true;
+    if (scope.type === "category") return categoryName(it.category) === scope.value;
+    if (scope.type === "location") return String(it.location || "").trim() === scope.value;
+    if (scope.type === "custom") {
+      const v = it.custom && it.custom[scope.field] != null ? String(it.custom[scope.field]).trim() : "";
+      return v === scope.value;
+    }
+    return true;
+  }
+
+  function itemsInCountScope(scope) {
+    return state.items.filter((it) => itemInCountScope(it, scope));
+  }
+
+  function sortCountItems(items) {
+    return items.slice().sort((a, b) =>
+      containerValueOf(a).localeCompare(containerValueOf(b), "he") ||
+      categoryName(a.category).localeCompare(categoryName(b.category), "he") ||
+      String(a.name || "").localeCompare(String(b.name || ""), "he")
+    );
+  }
+
+  function countScopeOptionsHtml(field, selId, values, dataAttr) {
+    return '<select id="' + escapeHtml(selId) + '"' + (dataAttr || "") + '>' +
+      values.map((v) => '<option value="' + escapeHtml(v) + '">' + escapeHtml(v) + "</option>").join("") +
+      "</select>";
+  }
+
+  function renderCountStart() {
+    const fields = countGroupFields();
+    const box = $("#count-scope");
+    let html = '<label class="count-opt"><input type="radio" name="count-scope" value="all" checked /> כל הפריטים</label>';
+    for (const f of fields) {
+      if (f.id === "category") {
+        html += '<label class="count-opt"><input type="radio" name="count-scope" value="category" /> ' +
+          escapeHtml(f.label) + " " + countScopeOptionsHtml(f, "count-scope-category", f.values) + "</label>";
+      } else if (f.id === "location") {
+        html += '<label class="count-opt"><input type="radio" name="count-scope" value="location" /> ' +
+          escapeHtml(f.label) + " " + countScopeOptionsHtml(f, "count-scope-location", f.values) + "</label>";
+      } else if (f.id.indexOf("custom:") === 0) {
+        const col = f.id.slice(7);
+        const sid = "count-scope-custom-" + encodeURIComponent(col);
+        html += '<label class="count-opt"><input type="radio" name="count-scope" value="custom:' + escapeHtml(col) + '" /> ' +
+          escapeHtml(f.label) + " " +
+          '<select id="' + escapeHtml(sid) + '" data-custom="' + escapeHtml(col) + '">' +
+          f.values.map((v) => '<option value="' + escapeHtml(v) + '">' + escapeHtml(v) + "</option>").join("") +
+          "</select></label>";
+      }
+    }
+    box.innerHTML = html;
+    box.querySelectorAll("select").forEach((sel) => {
+      sel.disabled = true;
+      sel.addEventListener("change", () => {
+        const radio = sel.closest("label").querySelector('input[type=radio]');
+        if (radio) radio.checked = true;
+        syncCountScopeRadios();
+        updateCountScopeCount();
+      });
+      sel.addEventListener("click", (e) => e.stopPropagation());
+    });
+    box.querySelectorAll('input[name="count-scope"]').forEach((r) => {
+      r.addEventListener("change", () => { syncCountScopeRadios(); updateCountScopeCount(); });
+    });
+    syncCountScopeRadios();
+    updateCountScopeCount();
+    renderCountResumeBanner();
+  }
+
+  function syncCountScopeRadios() {
+    $$('#count-scope input[name="count-scope"]').forEach((r) => {
+      const sel = r.closest("label").querySelector("select");
+      if (sel) sel.disabled = !r.checked;
+    });
+  }
+
+  function updateCountScopeCount() {
+    const n = itemsInCountScope(parseScopeFromForm()).length;
+    $("#count-scope-n").textContent = n ? (n + " פריטים בספירה") : "אין פריטים בטווח שנבחר";
+    const btn = $("#count-start");
+    if (btn) btn.disabled = n === 0;
+  }
+
+  function renderCountResumeBanner() {
+    const s = readCountSession();
+    const box = $("#count-resume");
+    if (!s || !s.itemIds || !s.itemIds.length) { box.classList.remove("show"); return; }
+    const done = countDecided(s);
+    const when = s.startedAt ? histTime(s.startedAt) : "";
+    const scopeTxt = countScopeLabel(s.scope);
+    $("#count-resume-msg").textContent = "נמצאה ספירה באמצע (" + done + " מתוך " + s.itemIds.length +
+      (scopeTxt ? ", " + scopeTxt : "") + (when ? ", התחילה ב־" + when : "") + "). אפשר להמשיך או להתחיל ספירה חדשה.";
+    box.classList.add("show");
+  }
+
+  function countScopeLabel(scope) {
+    if (!scope || scope.type === "all") return "כל הפריטים";
+    if (scope.type === "category") return "קטגוריה: " + (scope.value || "");
+    if (scope.type === "location") return "מיקום: " + (scope.value || "");
+    if (scope.type === "custom") return (scope.field || "שדה") + ": " + (scope.value || "");
+    return "";
+  }
+
+  function countDecided(s) {
+    const r = (s && s.results) || {};
+    return s.itemIds.filter((id) => r[id] && (r[id].skipped || r[id].counted != null)).length;
+  }
+
+  function countSnapshotOf(it) {
+    return {
+      id: it.id,
+      name: it.name || "",
+      sku: it.sku || "",
+      category: categoryName(it.category),
+      location: it.location || "",
+      container: containerValueOf(it),
+      recorded: Number(it.quantity) || 0,
+      cartonKey: cartonKeyOf(it),
+      perCarton: (function () { const k = cartonKeyOf(it); return k ? parseNumber(it.custom[k]) : null; })()
+    };
+  }
+
+  function startNewCount() {
+    const scope = parseScopeFromForm();
+    const items = sortCountItems(itemsInCountScope(scope));
+    if (!items.length) { showToast("אין פריטים בטווח שנבחר"); return; }
+    const snap = {};
+    const recorded = {};
+    items.forEach((it) => { snap[it.id] = countSnapshotOf(it); recorded[it.id] = Number(it.quantity) || 0; });
+    countSession = {
+      id: uid(),
+      startedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      phase: "counting",
+      scope: scope,
+      itemIds: items.map((it) => it.id),
+      recorded: recorded,
+      snap: snap,
+      results: {},
+      index: 0
+    };
+    writeCountSession();
+    updateCountChip();
+    showCountPanel("item");
+    renderCountItem();
+  }
+
+  function resumeCount() {
+    const s = readCountSession();
+    if (!s) { renderCountStart(); return; }
+    // drop ids that no longer exist; keep recorded snapshot
+    const live = new Set(state.items.map((it) => it.id));
+    // keep snapshots of deleted items until apply (apply will skip missing)
+    s.itemIds = s.itemIds.filter((id) => (s.snap && s.snap[id]) || live.has(id));
+    if (!s.itemIds.length) { clearCountSession(); renderCountStart(); showToast("הפריטים מהספירה הקודמת כבר לא במלאי"); return; }
+    if (s.index == null || s.index < 0) s.index = 0;
+    if (s.index >= s.itemIds.length) s.index = s.itemIds.length - 1;
+    writeCountSession();
+    if (s.phase === "summary") { showCountPanel("summary"); renderCountSummary(); }
+    else { showCountPanel("item"); renderCountItem(); }
+  }
+
+  function showCountPanel(name) {
+    ["start", "item", "summary"].forEach((p) => {
+      const el = $("#count-panel-" + p);
+      if (el) el.classList.toggle("on", p === name);
+    });
+    if (countSession) {
+      countSession.phase = name === "start" ? "counting" : name === "summary" ? "summary" : "counting";
+      writeCountSession();
+    }
+  }
+
+  function openCountModal() {
+    if (!requireEdit()) return;
+    openModal("count-modal");
+    setCountingUi(true);
+    const s = readCountSession();
+    if (s && s.phase === "summary") { showCountPanel("start"); renderCountStart(); }
+    else if (s && s.phase === "counting" && countDecided(s) > 0) { showCountPanel("start"); renderCountStart(); }
+    else { showCountPanel("start"); renderCountStart(); }
+  }
+
+  function closeCountModal() {
+    closeModal("count-modal");
+    setCountingUi(false);
+    updateCountChip();
+  }
+
+  function countItemRecord(id) {
+    const s = countSession;
+    if (!s) return null;
+    if (s.snap && s.snap[id]) return s.snap[id];
+    const it = state.items.find((x) => x.id === id);
+    return it ? countSnapshotOf(it) : null;
+  }
+
+  function currentCountId() {
+    if (!countSession) return null;
+    return countSession.itemIds[countSession.index] || null;
+  }
+
+  function renderCountItem() {
+    const s = countSession;
+    if (!s) return;
+    const n = s.itemIds.length;
+    const i = Math.max(0, Math.min(s.index || 0, n - 1));
+    s.index = i;
+    const id = s.itemIds[i];
+    const rec = countItemRecord(id);
+    if (!rec) { countAdvance(1); return; }
+    const decided = countDecided(s);
+    $("#count-progress-label").textContent = (i + 1) + " מתוך " + n;
+    $("#count-progress-meta").textContent = "נספרו " + Object.keys(s.results).filter((k) => s.results[k] && s.results[k].counted != null).length +
+      " · דולגו " + Object.keys(s.results).filter((k) => s.results[k] && s.results[k].skipped).length;
+    const pct = n ? Math.round((decided / n) * 100) : 0;
+    $("#count-progress-bar").style.width = pct + "%";
+    const track = $("#count-progress-track");
+    if (track) track.setAttribute("aria-valuenow", String(pct));
+    $("#count-item-name").textContent = rec.name || "ללא שם";
+    const bits = [];
+    if (rec.sku) bits.push("מק״ט " + rec.sku);
+    if (rec.container) bits.push("מכולה " + rec.container);
+    if (rec.category) bits.push(rec.category);
+    if (rec.location && rec.location !== rec.container) bits.push("מיקום " + rec.location);
+    $("#count-item-meta").innerHTML = bits.map((b) => "<span>" + escapeHtml(b) + "</span>").join("");
+    const recorded = s.recorded && s.recorded[id] != null ? s.recorded[id] : rec.recorded;
+    $("#count-recorded").innerHTML = "רשום במלאי: <b>" + formatNumber(recorded, 0) + "</b>";
+    const res = (s.results && s.results[id]) || {};
+    const input = $("#count-qty");
+    countCartonSync = true;
+    if (res.skipped) input.value = "";
+    else if (res.counted != null) input.value = String(res.counted);
+    else input.value = "";
+    const per = rec.perCarton && rec.perCarton > 0 ? rec.perCarton : null;
+    const cartonBox = $("#count-carton");
+    if (per) {
+      cartonBox.classList.add("show");
+      $("#count-per-carton").textContent = formatNumber(per, 0);
+      $("#count-carton-label").textContent = rec.cartonKey
+        ? ("הקלדה לפי קרטונים · " + rec.cartonKey + ": " + formatNumber(per, 0))
+        : ("הקלדה לפי קרטונים · " + formatNumber(per, 0) + " יח׳ בקרטון");
+      fillCountCartonInputs(parseNumber(input.value), per);
+    } else {
+      cartonBox.classList.remove("show");
+    }
+    countCartonSync = false;
+    $("#count-prev").disabled = i === 0;
+    $("#count-next").textContent = i === n - 1 ? "לסיכום" : "הבא";
+    writeCountSession();
+    setTimeout(() => { input.focus(); input.select(); }, 80);
+  }
+
+  function fillCountCartonInputs(qty, per) {
+    if (qty == null || qty < 0) { $("#count-cartons").value = ""; $("#count-loose").value = ""; $("#count-carton-sum").textContent = "—"; return; }
+    const cartons = Math.floor(qty / per);
+    const loose = Math.round((qty - cartons * per) * 1000) / 1000;
+    $("#count-cartons").value = String(cartons);
+    $("#count-loose").value = String(loose);
+    $("#count-carton-sum").textContent = formatNumber(qty, 0);
+  }
+
+  function qtyFromCountCarton() {
+    const rec = countItemRecord(currentCountId());
+    const per = rec && rec.perCarton > 0 ? rec.perCarton : 0;
+    if (!per) return parseNumber($("#count-qty").value);
+    const c = parseNumber($("#count-cartons").value);
+    const l = parseNumber($("#count-loose").value);
+    if (c == null && l == null) return parseNumber($("#count-qty").value);
+    return Math.max(0, (c || 0) * per + (l || 0));
+  }
+
+  function onCountQtyInput() {
+    if (countCartonSync) return;
+    const rec = countItemRecord(currentCountId());
+    const per = rec && rec.perCarton > 0 ? rec.perCarton : null;
+    if (!per) return;
+    countCartonSync = true;
+    fillCountCartonInputs(parseNumber($("#count-qty").value), per);
+    countCartonSync = false;
+  }
+
+  function onCountCartonInput() {
+    if (countCartonSync) return;
+    countCartonSync = true;
+    const qty = qtyFromCountCarton();
+    if (qty == null) { $("#count-qty").value = ""; $("#count-carton-sum").textContent = "—"; }
+    else { $("#count-qty").value = String(qty); $("#count-carton-sum").textContent = formatNumber(qty, 0); }
+    countCartonSync = false;
+  }
+
+  function saveCurrentCount(opts) {
+    const s = countSession;
+    if (!s) return false;
+    const id = currentCountId();
+    if (!id) return false;
+    const recorded = s.recorded && s.recorded[id] != null ? s.recorded[id] : 0;
+    if (opts && opts.same) {
+      s.results[id] = { counted: recorded, skipped: false };
+      writeCountSession();
+      return true;
+    }
+    if (opts && opts.skip) {
+      s.results[id] = { counted: null, skipped: true };
+      writeCountSession();
+      return true;
+    }
+    const raw = $("#count-qty").value;
+    const v = parseNumber(raw);
+    if (v == null || v < 0) return false;
+    s.results[id] = { counted: Math.round(v * 1000) / 1000, skipped: false };
+    writeCountSession();
+    return true;
+  }
+
+  function countAdvance(dir) {
+    const s = countSession;
+    if (!s) return;
+    const next = (s.index || 0) + dir;
+    if (next < 0) return;
+    if (next >= s.itemIds.length) { showCountPanel("summary"); renderCountSummary(); return; }
+    s.index = next;
+    writeCountSession();
+    renderCountItem();
+  }
+
+  function countGoNext() {
+    if (!saveCurrentCount({})) {
+      showToast("יש להקליד כמות, לדלג, או לסמן «זהה לרשום»");
+      $("#count-qty").focus();
+      return;
+    }
+    countAdvance(1);
+  }
+  function countGoPrev() {
+    // stash typed value if valid, but don't require it
+    const raw = $("#count-qty").value;
+    const v = parseNumber(raw);
+    if (v != null && v >= 0 && countSession) {
+      const id = currentCountId();
+      if (id) countSession.results[id] = { counted: Math.round(v * 1000) / 1000, skipped: false };
+    }
+    countAdvance(-1);
+  }
+  function countSkip() {
+    saveCurrentCount({ skip: true });
+    countAdvance(1);
+  }
+  function countSame() {
+    saveCurrentCount({ same: true });
+    countAdvance(1);
+  }
+  function countGoSummary() {
+    // save current if valid, otherwise leave as-is
+    const raw = $("#count-qty").value;
+    const v = parseNumber(raw);
+    if (v != null && v >= 0) saveCurrentCount({});
+    if (!countSession) return;
+    showCountPanel("summary");
+    renderCountSummary();
+  }
+
+  function countDiffs() {
+    const s = countSession;
+    if (!s) return { diffs: [], skipped: [], same: [], missing: [] };
+    const diffs = [], skipped = [], same = [], missing = [];
+    for (const id of s.itemIds) {
+      const rec = countItemRecord(id);
+      const r = (s.results && s.results[id]) || {};
+      const recorded = s.recorded && s.recorded[id] != null ? s.recorded[id] : (rec ? rec.recorded : 0);
+      if (r.skipped) { skipped.push({ id, rec, recorded }); continue; }
+      if (r.counted == null) { missing.push({ id, rec, recorded }); continue; }
+      const gap = Math.round((r.counted - recorded) * 1000) / 1000;
+      const row = { id, rec, recorded, counted: r.counted, gap };
+      if (gap === 0) same.push(row);
+      else diffs.push(row);
+    }
+    return { diffs, skipped, same, missing };
+  }
+
+  function renderCountSummary() {
+    const s = countSession;
+    if (!s) return;
+    const { diffs, skipped, same, missing } = countDiffs();
+    const decided = diffs.length + skipped.length + same.length;
+    $("#count-sum-lead").textContent = decided + " מתוך " + s.itemIds.length + " טופלו · " +
+      diffs.length + " עם הפרש" +
+      (skipped.length ? " · " + skipped.length + " דולגו" : "") +
+      (same.length ? " · " + same.length + " ללא שינוי" : "") +
+      (missing.length ? " · " + missing.length + " לא נספרו" : "") +
+      (s.scope ? " · " + countScopeLabel(s.scope) : "");
+    let html = "";
+    if (!diffs.length && !skipped.length && !same.length) {
+      html = '<div class="count-empty-sum">עדיין לא נספר אף פריט. אפשר לחזור לספירה או לבטל.</div>';
+    } else {
+      if (diffs.length) {
+        html += diffs.map((d) => {
+          const sign = d.gap > 0 ? "+" : "";
+          const cls = d.gap > 0 ? "gap-up" : "gap-down";
+          return '<div class="cnt-diff ' + cls + '" data-id="' + escapeHtml(d.id) + '">' +
+            '<div class="cd-name">' + escapeHtml((d.rec && d.rec.name) || "") +
+              (d.rec && d.rec.sku ? ' <span class="cd-sku">' + escapeHtml(d.rec.sku) + "</span>" : "") + "</div>" +
+            '<div class="cd-nums">' +
+              "<span>רשום <b>" + formatNumber(d.recorded, 0) + "</b></span>" +
+              "<span>נספר <b>" + formatNumber(d.counted, 0) + "</b></span>" +
+              '<span class="cd-gap">פער <b>' + sign + formatNumber(d.gap, 0) + "</b></span>" +
+            "</div></div>";
+        }).join("");
+      } else {
+        html += '<div class="count-empty-sum">אין הפרשים בין הכמות שנרשמה לכמות שנספרה.</div>';
+      }
+      if (skipped.length) {
+        html += '<div class="count-skip-title">דולגו (' + skipped.length + ")</div>" +
+          skipped.map((d) => '<div class="cnt-skip" data-id="' + escapeHtml(d.id) + '"><div class="cd-name">' +
+            escapeHtml((d.rec && d.rec.name) || "") +
+            (d.rec && d.rec.sku ? ' <span class="cd-sku">' + escapeHtml(d.rec.sku) + "</span>" : "") +
+            "</div><div class=\"cd-nums\" style=\"margin-top:4px;font-size:13px;color:var(--muted)\">רשום " +
+            formatNumber(d.recorded, 0) + "</div></div>").join("");
+      }
+      if (same.length) {
+        html += '<div class="count-same-note">' + same.length + " פריטים נספרו זהים לרשום ולא יופיעו ברשימת ההפרשים.</div>";
+      }
+      if (missing.length) {
+        html += '<div class="count-skip-title">לא נספרו (' + missing.length + ")</div>" +
+          missing.map((d) => '<div class="cnt-skip" data-id="' + escapeHtml(d.id) + '"><div class="cd-name">' +
+            escapeHtml((d.rec && d.rec.name) || "") + "</div></div>").join("");
+      }
+    }
+    $("#count-sum-body").innerHTML = html;
+    $("#count-apply").disabled = diffs.length === 0;
+    writeCountSession();
+  }
+
+  function exportCountSummary() {
+    const s = countSession;
+    if (!s) return;
+    const { diffs, skipped, same, missing } = countDiffs();
+    const headers = ["שם", "מק״ט", "קטגוריה", "מכולה", "מיקום", "רשום", "נספר", "פער", "סטטוס"];
+    const aoa = [headers];
+    const row = (d, status, counted, gap) => [
+      (d.rec && d.rec.name) || "",
+      (d.rec && d.rec.sku) || "",
+      (d.rec && d.rec.category) || "",
+      (d.rec && d.rec.container) || "",
+      (d.rec && d.rec.location) || "",
+      d.recorded,
+      counted,
+      gap,
+      status
+    ];
+    diffs.forEach((d) => aoa.push(row(d, "הפרש", d.counted, d.gap)));
+    skipped.forEach((d) => aoa.push(row(d, "דולג", "", "")));
+    same.forEach((d) => aoa.push(row(d, "ללא שינוי", d.counted, 0)));
+    missing.forEach((d) => aoa.push(row(d, "לא נספר", "", "")));
+    if (aoa.length === 1) { showToast("אין נתונים לייצוא"); return; }
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws["!cols"] = [{ wch: 28 }, { wch: 12 }, { wch: 16 }, { wch: 14 }, { wch: 14 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 12 }];
+    ws["!views"] = [{ RTL: true, rightToLeft: true }];
+    const wb = makeWorkbook();
+    XLSX.utils.book_append_sheet(wb, ws, "ספירת מלאי");
+    downloadBlob(new Blob([writeXlsx(wb)], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), "sefirat-malai-" + todayStamp() + ".xlsx");
+    showToast("סיכום הספירה יוצא לאקסל");
+  }
+
+  function countedValuesToApply() {
+    const { diffs, same } = countDiffs();
+    const counts = {};
+    diffs.concat(same).forEach((d) => { counts[d.id] = d.counted; });
+    return counts;
+  }
+
+  function applyCountToState(counts) {
+    let n = 0;
+    for (const id of Object.keys(counts)) {
+      const it = state.items.find((x) => x.id === id);
+      if (!it) continue;
+      const old = Number(it.quantity) || 0;
+      const next = Math.max(0, Math.round((Number(counts[id]) || 0) * 1000) / 1000);
+      if (next === old) continue;
+      it.quantity = next;
+      addHistory("count", it, FIELD_LABELS.quantity, old, next);
+      n++;
+    }
+    return n;
+  }
+
+  function waitForCloudSave(timeoutMs) {
+    return new Promise((resolve) => {
+      const t0 = Date.now();
+      const tick = () => {
+        if (!sync.dirty && !sync.saving) return resolve(true);
+        if (Date.now() - t0 > (timeoutMs || 12000)) return resolve(false);
+        setTimeout(tick, 60);
+      };
+      tick();
+    });
+  }
+
+  async function applyCountAndSave() {
+    if (!requireEdit()) return;
+    const s = countSession;
+    if (!s) return;
+    const counts = countedValuesToApply();
+    const diffs = countDiffs().diffs;
+    if (!diffs.length) { showToast("אין שינויים לעדכון"); return; }
+    const btn = $("#count-apply");
+    if (btn) { btn.disabled = true; btn.textContent = "מעדכן…"; }
+    pushUndo();
+    countApply = { counts: counts, attempts: 0 };
+    const n = applyCountToState(counts);
+    writeCache();
+    if (CLOUD) {
+      sync.dirty = true;
+      setSyncStatus();
+      scheduleSave(0);
+      const ok = await waitForCloudSave(15000);
+      if (!ok) showToast("המלאי עודכן במכשיר הזה. השמירה לענן תסתיים כשהחיבור יתייצב.");
+      if (!sync.dirty && !sync.saving) countApply = null;
+    } else {
+      countApply = null;
+    }
+    clearCountSession();
+    closeCountModal();
+    render();
+    showToast(n ? ("עודכנו " + n + " פריטים לפי הספירה") : "אין שינויים לעדכון", !CLOUD && n > 0);
+    if (btn) { btn.disabled = false; btn.textContent = "אישור ועדכון המלאי"; }
+  }
+
+  function cancelCount() {
+    confirmModal("ביטול הספירה", "לבטל את הספירה? הכמויות שנספרו לא יישמרו במלאי.", "בטל ספירה", () => {
+      clearCountSession();
+      closeCountModal();
+      showToast("הספירה בוטלה");
+    }, { danger: true });
+  }
+
+  function confirmNewCount() {
+    const s = readCountSession();
+    if (s && countDecided(s) > 0) {
+      confirmModal("ספירה חדשה", "להתחיל ספירה חדשה? הספירה הקודמת שלא אושרה תימחק.", "ספירה חדשה", () => {
+        clearCountSession();
+        $("#count-resume").classList.remove("show");
+        startNewCount();
+      }, { danger: true });
+      return;
+    }
+    clearCountSession();
+    startNewCount();
+  }
+
+  function bindCountUi() {
+    $("#chip-count").addEventListener("click", openCountModal);
+    $("#btn-count-m").addEventListener("click", openCountModal);
+    $("#count-start").addEventListener("click", () => {
+      const s = readCountSession();
+      if (s && countDecided(s) > 0) confirmNewCount();
+      else startNewCount();
+    });
+    $("#count-resume-btn").addEventListener("click", resumeCount);
+    $("#count-resume-new").addEventListener("click", confirmNewCount);
+    $("#count-next").addEventListener("click", countGoNext);
+    $("#count-prev").addEventListener("click", countGoPrev);
+    $("#count-skip").addEventListener("click", countSkip);
+    $("#count-same").addEventListener("click", countSame);
+    $("#count-to-summary").addEventListener("click", countGoSummary);
+    $("#count-back").addEventListener("click", () => { showCountPanel("item"); renderCountItem(); });
+    $("#count-pause").addEventListener("click", () => {
+      if (countSession) {
+        const raw = $("#count-qty").value;
+        const v = parseNumber(raw);
+        if (v != null && v >= 0) saveCurrentCount({});
+        writeCountSession();
+      }
+      closeCountModal();
+      showToast("הספירה נשמרה במכשיר. אפשר להמשיך אחר כך.");
+    });
+    $("#count-cancel").addEventListener("click", cancelCount);
+    $("#count-export").addEventListener("click", exportCountSummary);
+    $("#count-apply").addEventListener("click", () => { applyCountAndSave(); });
+    $("#count-qty").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); countGoNext(); }
+    });
+    $("#count-qty").addEventListener("input", onCountQtyInput);
+    $("#count-cartons").addEventListener("input", onCountCartonInput);
+    $("#count-loose").addEventListener("input", onCountCartonInput);
+    ["#count-cartons", "#count-loose"].forEach((sel) => {
+      $(sel).addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); countGoNext(); } });
+    });
+  }
+
   function pushUndo() {
     undoStack = {
       items: deepClone(state.items),
@@ -3494,14 +4519,15 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     $("#chip-low").classList.toggle("active", state.ui.lowOnly);
     $("#status-filter").value = state.ui.statusFilter || "";
     updateOrderCount();
+    updateCountChip();
     if ($("#order-modal").classList.contains("open")) renderOrder();
     $("#search-input").value = state.ui.query;
   }
 
   /* ------------ ui chrome ------------ */
   function openModal(id) { $("#" + id).classList.add("open"); }
-  function closeModal(id) { $("#" + id).classList.remove("open"); }
-  function closeAllModals() { $$(".overlay.open").forEach((el) => el.classList.remove("open")); }
+  function closeModal(id) { $("#" + id).classList.remove("open"); if (id === "count-modal") setCountingUi(false); }
+  function closeAllModals() { $$(".overlay.open").forEach((el) => el.classList.remove("open")); setCountingUi(false); }
 
   function confirmModal(title, message, okLabel, onOk, opts) {
     $("#confirm-title").textContent = title;
@@ -4222,6 +5248,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     // history
     $("#chip-history").addEventListener("click", () => openHistory(""));
     $("#btn-history-m").addEventListener("click", () => openHistory(""));
+    bindCountUi();
     ["#hist-q", "#hist-from", "#hist-to"].forEach((s) => $(s).addEventListener("input", renderHistoryTable));
     ["#hist-item", "#hist-action", "#hist-from", "#hist-to"].forEach((s) => $(s).addEventListener("change", renderHistoryTable));
     $("#hist-export").addEventListener("click", exportHistory);
@@ -4235,7 +5262,9 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       ov.addEventListener("click", (e) => { if (e.target === ov && ov.dataset.locked !== "1") ov.classList.remove("open"); });
     });
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") closeAllModals();
+      if (e.key !== "Escape") return;
+      if ($("#confirm-modal") && $("#confirm-modal").classList.contains("open")) { closeModal("confirm-modal"); return; }
+      closeAllModals();
     });
 
     // drag and drop
