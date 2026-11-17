@@ -1818,6 +1818,48 @@ svg.chart .axis { stroke: var(--line-strong, var(--line)); }
   .sig-box { height: 190px; }
 }
 
+/* v5: בורר פריטים בטופס הנפקה — קטגוריות + חיפוש */
+.iss-picker { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); padding: 10px; margin-bottom: 10px; }
+.iss-pick-search { min-width: 0; }
+.iss-pick-search input { width: 100%; height: var(--ctl-h, 36px); }
+.iss-pick-search input::-webkit-search-cancel-button { cursor: pointer; }
+.iss-pick-cats { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.iss-pick-cats .chip { flex: 0 0 auto; cursor: pointer; }
+.iss-pick-cats .chip.is-empty { opacity: .5; }
+.iss-pick-list { max-height: 264px; overflow-y: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+.ipl-head { position: sticky; top: 0; z-index: 1; background: var(--surface-3, var(--surface-2)); color: var(--ink-2); font-size: 12px; font-weight: 600; padding: 4px 12px; border-bottom: 1px solid var(--line); }
+.iss-pick-row { display: flex; align-items: center; gap: 10px; width: 100%; text-align: right; background: var(--surface); color: var(--ink); border: 0; border-bottom: 1px solid var(--line); padding: 8px 12px; min-height: 48px; font: inherit; cursor: pointer; }
+.iss-pick-row:last-child { border-bottom: 0; }
+.iss-pick-row:hover { background: var(--surface-2); }
+.iss-pick-row:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--accent); }
+.iss-pick-row.is-sel { background: var(--accent-soft, #EAF2F1); box-shadow: inset -3px 0 0 var(--accent); }
+.iss-pick-row.is-out { cursor: not-allowed; color: var(--muted); background: var(--surface-2); }
+.ipr-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.ipr-name { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ipr-sub { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ipr-side { flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ipr-side b { font-size: 14px; color: var(--ink); }
+.ipr-in { color: var(--accent-ink, #0F5E5A); font-weight: 600; }
+.ipl-empty { padding: 18px 12px; text-align: center; color: var(--muted); font-size: 13px; }
+.ipl-empty .btn { margin-top: 8px; }
+.iss-add .iss-item-sel { display: none; }
+div.fld.iss-add-item { display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-weight: 500; color: var(--ink-2); }
+.iss-chosen { display: flex; align-items: center; gap: 8px; min-height: var(--ctl-h, 36px); border: 1px solid var(--line-strong, var(--line)); border-radius: 6px; padding: 0 10px; background: var(--surface-2); color: var(--muted); font-size: 13px; min-width: 0; }
+.iss-chosen.has { background: var(--accent-soft, #EAF2F1); border-color: var(--accent); color: var(--ink); }
+.iss-chosen .ic-txt { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.iss-chosen .ic-txt b { font-weight: 600; }
+.iss-chosen .ic-clear { flex: 0 0 auto; border: 0; background: transparent; color: var(--muted); font-size: 18px; line-height: 1; width: 28px; height: 28px; border-radius: 4px; cursor: pointer; padding: 0; }
+.iss-chosen .ic-clear:hover { background: var(--surface-3, var(--surface-2)); color: var(--ink); }
+@media (max-width: 860px) {
+  .iss-picker { padding: 8px; }
+  .iss-pick-search input { font-size: 16px; }
+  .iss-pick-cats { flex-wrap: nowrap; overflow-x: auto; margin: 8px -8px; padding: 0 8px 2px; scrollbar-width: none; }
+  .iss-pick-cats::-webkit-scrollbar { display: none; }
+  .iss-pick-list { max-height: 300px; }
+  .iss-pick-row { min-height: 52px; }
+  .iss-chosen { min-height: 44px; font-size: 14px; }
+}
+
 /* ---------------- הדפסה ---------------- */
 .print-root { display: none; }
 @media print {
@@ -2434,8 +2476,17 @@ body.drawer-lock { overflow: hidden; }
         </div>
 
         <h3 class="v2-h3">פריטים להנפקה</h3>
+        <!-- v5: בחירת פריט לפי קטגוריה + חיפוש בתוך הקטגוריה -->
+        <div class="iss-picker" id="iss-picker">
+          <div class="search iss-pick-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+            <input id="iss-pick-q" type="search" placeholder="חיפוש פריט לפי שם או מק״ט…" autocomplete="off" enterkeyhint="search" aria-label="חיפוש פריט" />
+          </div>
+          <div class="iss-pick-cats" id="iss-pick-cats" aria-label="סינון לפי קטגוריה"></div>
+          <div class="iss-pick-list" id="iss-pick-list" role="listbox" aria-label="פריטים במלאי"></div>
+        </div>
         <div class="iss-add">
-          <label class="fld iss-add-item"><span>פריט</span><select id="iss-item"></select></label>
+          <div class="fld iss-add-item"><span>פריט שנבחר</span><div class="iss-chosen" id="iss-chosen"></div><select id="iss-item" class="iss-item-sel" tabindex="-1" aria-hidden="true"></select></div>
           <label class="fld iss-add-qty"><span>כמות</span><input id="iss-qty" type="number" inputmode="decimal" min="0" step="any" /></label>
           <button type="button" class="btn btn-outline" id="iss-add-line">הוספה</button>
         </div>
@@ -6944,9 +6995,133 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     });
     sel.innerHTML = html;
   }
+  /* v5: בורר פריטים — קטגוריות + חיפוש בתוך הקטגוריה */
+  const issPick = { cat: "", q: "" };
+  function pickNorm(v) {
+    return String(v == null ? "" : v).toLowerCase()
+      .replace(/[\u0591-\u05C7]/g, "")
+      .replace(/[ך]/g, "כ").replace(/[ם]/g, "מ").replace(/[ן]/g, "נ").replace(/[ף]/g, "פ").replace(/[ץ]/g, "צ")
+      .replace(/["'`\u05F3\u05F4\u2018\u2019\u201C\u201D\-\u2013\u2014_.,\/\\()]/g, "")
+      .replace(/\s+/g, " ").trim();
+  }
+  function pickMatches(it, tokens) {
+    if (!tokens.length) return true;
+    const hay = pickNorm(it.name) + " " + pickNorm(it.sku) + " " + pickNorm(categoryName(it.category));
+    for (let i = 0; i < tokens.length; i++) if (hay.indexOf(tokens[i]) < 0) return false;
+    return true;
+  }
+  function pickTokens() { const n = pickNorm(issPick.q); return n ? n.split(" ") : []; }
+  function resetIssuePicker() {
+    issPick.cat = ""; issPick.q = "";
+    const inp = $("#iss-pick-q"); if (inp) inp.value = "";
+    const l = $("#iss-pick-list"); if (l) l.scrollTop = 0;
+    renderIssuePicker();
+  }
+  function renderIssuePicker() {
+    const listEl = $("#iss-pick-list"), catsEl = $("#iss-pick-cats");
+    if (!listEl || !catsEl) return;
+    const tokens = pickTokens();
+    const cats = allCategoryNames();
+    const all = InventoryData.items();
+    const byCat = {};
+    cats.forEach((c) => { byCat[c] = []; });
+    all.forEach((it) => { const c = categoryName(it.category); if (!byCat[c]) { byCat[c] = []; cats.push(c); } if (pickMatches(it, tokens)) byCat[c].push(it); });
+    if (issPick.cat && !byCat[issPick.cat]) issPick.cat = "";
+    const total = cats.reduce((s, c) => s + byCat[c].length, 0);
+    const hasItems = (c) => all.some((it) => categoryName(it.category) === c);
+    let chips = '<button type="button" class="chip' + (issPick.cat === "" ? " active" : "") + '" data-cat="" aria-pressed="' + (issPick.cat === "") + '">הכל <span class="cnt">' + total + "</span></button>";
+    cats.forEach((c) => {
+      if (!hasItems(c)) return;
+      const n = byCat[c].length, on = issPick.cat === c;
+      chips += '<button type="button" class="chip' + (on ? " active" : "") + (n ? "" : " is-empty") + '" data-cat="' + escapeHtml(c) + '" aria-pressed="' + on + '">' + escapeHtml(c) + ' <span class="cnt">' + n + "</span></button>";
+    });
+    catsEl.innerHTML = chips;
+    const selId = $("#iss-item").value;
+    const inDraft = {};
+    issueDraft.lines.forEach((l) => { inDraft[l.itemId] = (inDraft[l.itemId] || 0) + l.qty; });
+    const row = (it, showCat) => {
+      const qn = Number(it.quantity) || 0, out = qn <= 0;
+      const sub = [];
+      if (it.sku) sub.push("מק״ט " + escapeHtml(it.sku));
+      if (showCat) sub.push(escapeHtml(categoryName(it.category)));
+      if (it.location) sub.push(escapeHtml(it.location));
+      return '<button type="button" role="option" class="iss-pick-row' + (out ? " is-out" : "") + (it.id === selId ? " is-sel" : "") + '" data-id="' + escapeHtml(it.id) + '"' +
+        (out ? ' disabled aria-disabled="true"' : "") + ' aria-selected="' + (it.id === selId) + '">' +
+        '<span class="ipr-main"><span class="ipr-name">' + escapeHtml(it.name) + "</span>" + (sub.length ? '<span class="ipr-sub">' + sub.join(" · ") + "</span>" : "") + "</span>" +
+        '<span class="ipr-side">' + (out ? statusBadge("out") : "<span>במלאי <b>" + fmtN(qn) + "</b></span>") +
+          (inDraft[it.id] ? '<span class="ipr-in">בטופס: ' + fmtN(inDraft[it.id]) + "</span>" : "") + "</span></button>";
+    };
+    const sortList = (arr) => arr.slice().sort((a, b) => {
+      const ao = (Number(a.quantity) || 0) <= 0 ? 1 : 0, bo = (Number(b.quantity) || 0) <= 0 ? 1 : 0;
+      return ao - bo || String(a.name).localeCompare(String(b.name), "he");
+    });
+    let html = "";
+    if (issPick.cat) {
+      html = sortList(byCat[issPick.cat]).map((it) => row(it, false)).join("");
+    } else {
+      cats.forEach((c) => {
+        if (!byCat[c].length) return;
+        html += '<div class="ipl-head">' + escapeHtml(c) + "</div>" + sortList(byCat[c]).map((it) => row(it, false)).join("");
+      });
+    }
+    if (!html) {
+      if (!all.length) html = '<div class="ipl-empty">אין פריטים במלאי</div>';
+      else if (issPick.cat && total) html = '<div class="ipl-empty">לא נמצא «' + escapeHtml(issPick.q.trim()) + "» ב" + escapeHtml(issPick.cat) + '<br><button type="button" class="btn btn-sm btn-outline" id="iss-pick-all">חיפוש בכל הקטגוריות (' + total + ")</button></div>";
+      else html = '<div class="ipl-empty">לא נמצאו פריטים' + (issPick.q.trim() ? " עבור «" + escapeHtml(issPick.q.trim()) + "»" : "") + "</div>";
+    }
+    listEl.innerHTML = html;
+    renderIssueChosen();
+  }
+  function renderIssueChosen() {
+    const box = $("#iss-chosen");
+    if (!box) return;
+    const it = InventoryData.item($("#iss-item").value);
+    box.classList.toggle("has", !!it);
+    box.innerHTML = it
+      ? '<span class="ic-txt"><b>' + escapeHtml(it.name) + "</b>" + (it.sku ? " · " + escapeHtml(it.sku) : "") + '</span><button type="button" class="ic-clear" id="iss-chosen-clear" aria-label="ביטול בחירה">×</button>'
+      : '<span class="ic-txt">בחרו פריט מהרשימה</span>';
+  }
+  function pickIssueItem(id) {
+    const it = InventoryData.item(id);
+    if (!it || (Number(it.quantity) || 0) <= 0) return;
+    $("#iss-item").value = id;
+    showErrors("#iss-errors", []);
+    renderIssueHint();
+    $("#iss-qty").focus();
+  }
+  function wireIssuePicker() {
+    const q = $("#iss-pick-q");
+    if (!q) return;
+    q.addEventListener("input", () => { issPick.q = q.value; $("#iss-pick-list").scrollTop = 0; renderIssuePicker(); });
+    q.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      const rows = $("#iss-pick-list").querySelectorAll(".iss-pick-row:not([disabled])");
+      if (rows.length === 1) pickIssueItem(rows[0].getAttribute("data-id"));
+    });
+    $("#iss-pick-cats").addEventListener("click", (e) => {
+      const c = e.target.closest("[data-cat]");
+      if (!c) return;
+      issPick.cat = c.getAttribute("data-cat");
+      $("#iss-pick-list").scrollTop = 0;
+      renderIssuePicker();
+    });
+    $("#iss-pick-list").addEventListener("click", (e) => {
+      if (e.target.closest("#iss-pick-all")) { issPick.cat = ""; renderIssuePicker(); return; }
+      const r = e.target.closest(".iss-pick-row");
+      if (r && !r.disabled) pickIssueItem(r.getAttribute("data-id"));
+    });
+    $("#iss-chosen").addEventListener("click", (e) => {
+      if (!e.target.closest("#iss-chosen-clear")) return;
+      $("#iss-item").value = "";
+      renderIssueHint();
+      q.focus();
+    });
+  }
   function renderIssueHint() {
     const it = InventoryData.item($("#iss-item").value);
     const box = $("#iss-item-hint");
+    renderIssuePicker();
     if (!it) { box.textContent = ""; return; }
     const inDraft = issueDraft.lines.filter((l) => l.itemId === it.id).reduce((s, l) => s + l.qty, 0);
     const parts = ["במלאי: " + fmtN(it.quantity)];
@@ -6997,8 +7172,9 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     showErrors("#iss-errors", []);
     $("#iss-qty").value = "";
     $("#iss-item").value = "";
-    renderIssueHint();
+    issPick.q = ""; if ($("#iss-pick-q")) $("#iss-pick-q").value = "";
     renderIssueLines();
+    renderIssueHint();
   }
   function openIssueModal() {
     if (!Auth.can("issue")) return;
@@ -7010,6 +7186,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     $("#iss-approver").value = InventoryData.approverName();
     $("#iss-approver-save").checked = !InventoryData.approverName();
     renderIssueItemOptions();
+    issPick.cat = ""; issPick.q = ""; if ($("#iss-pick-q")) $("#iss-pick-q").value = ""; if ($("#iss-pick-list")) $("#iss-pick-list").scrollTop = 0;
     renderIssueHint();
     renderIssueLines();
     showErrors("#iss-errors", []);
@@ -7723,6 +7900,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     // טופס הנפקה
     $("#iss-item").addEventListener("change", () => { renderIssueHint(); if ($("#iss-item").value) $("#iss-qty").focus(); });
     $("#iss-add-line").addEventListener("click", addIssueLine);
+    wireIssuePicker();
     $("#iss-qty").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); addIssueLine(); } });
     $("#iss-lines").addEventListener("input", (e) => {
       const inp = e.target.closest(".iss-line-qty");
@@ -7730,7 +7908,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       const l = issueDraft.lines[Number(inp.dataset.i)];
       if (l) l.qty = parseNumber(inp.value) || 0;
     });
-    $("#iss-lines").addEventListener("change", (e) => { if (e.target.closest(".iss-line-qty")) { issueDraft.lines = issueDraft.lines.filter((l) => l.qty > 0); renderIssueLines(); } });
+    $("#iss-lines").addEventListener("change", (e) => { if (e.target.closest(".iss-line-qty")) { issueDraft.lines = issueDraft.lines.filter((l) => l.qty > 0); renderIssueLines(); renderIssuePicker(); } });
     $("#iss-lines").addEventListener("click", (e) => {
       const b = e.target.closest(".iss-line-del");
       if (!b) return;
