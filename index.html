@@ -2245,11 +2245,12 @@ body.drawer-lock { overflow: hidden; }
   <div class="overlay" id="name-modal">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="name-title" style="max-width:420px">
       <h2 id="name-title">שם העורך</h2>
-      <p class="lead">השם יופיע בהיסטוריית השינויים, כדי שיהיה ברור מי ערך את המלאי. אפשר לדלג או לשנות אחר כך.</p>
+      <p class="lead" id="name-lead">השם יופיע בהיסטוריית השינויים, ביומן הפעולות ובטופסי ההנפקה, כדי שיהיה ברור מי עשה מה. אפשר לשנות אותו אחר כך בתפריט (הגדרות ← שם העורך).</p>
       <form id="name-form">
-        <label class="fld"><span>שם (לא חובה)</span><input id="editor-name-input" type="text" autocomplete="nickname" maxlength="40" placeholder="לדוגמה: יעקב" /></label>
+        <div class="v2-errors" id="name-error" role="alert"></div>
+        <label class="fld"><span>שם *</span><input id="editor-name-input" type="text" autocomplete="nickname" maxlength="40" minlength="2" placeholder="לדוגמה: יעקב" /></label>
         <div class="modal-actions">
-          <button type="button" class="btn btn-ghost" id="name-skip">דילוג</button>
+          <button type="button" class="btn btn-ghost" id="name-skip">ביטול</button>
           <div class="right"><button type="submit" class="btn btn-primary" id="name-save">שמירה</button></div>
         </div>
       </form>
@@ -3288,18 +3289,36 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     try { localStore.setItem(EDITOR_ASKED_KEY, "1"); } catch (e) {}
   }
 
+  const MIN_EDITOR_NAME = 2;
+  let nameRequired = false;   // true כשהחלון נפתח כחובה (אין שם שמור תקין)
+  function validEditorName(v) { return String(v || "").trim().length >= MIN_EDITOR_NAME; }
   function openNameModal(firstTime) {
     const input = $("#editor-name-input");
     if (!input) return;
+    // חובה בכניסה הראשונה, וגם כשאין עדיין שם תקין שמור (למשל מי שדילג בגרסה הקודמת)
+    nameRequired = !!firstTime || !validEditorName(editorName);
     input.value = editorName || "";
     const skip = $("#name-skip");
-    if (skip) skip.textContent = firstTime ? "דילוג" : "ביטול";
+    if (skip) { skip.textContent = "ביטול"; skip.style.display = nameRequired ? "none" : ""; }
+    const ov = $("#name-modal");
+    if (ov) { if (nameRequired) ov.setAttribute("data-locked", "1"); else ov.removeAttribute("data-locked"); }
+    const err = $("#name-error");
+    if (err) { err.textContent = ""; err.classList.remove("show"); }
     openModal("name-modal");
     setTimeout(() => input.focus(), 30);
   }
 
   function submitEditorName() {
-    setEditorName($("#editor-name-input").value);
+    const v = $("#editor-name-input").value;
+    if (!validEditorName(v)) {
+      const err = $("#name-error");
+      if (err) { err.textContent = "נא להזין שם (לפחות " + MIN_EDITOR_NAME + " תווים)"; err.classList.add("show"); }
+      $("#editor-name-input").focus();
+      return;
+    }
+    nameRequired = false;
+    $("#name-modal").removeAttribute("data-locked");
+    setEditorName(v);
     markEditorAsked();
     closeModal("name-modal");
     const me = $("#hist-me");
@@ -3308,6 +3327,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   function skipEditorName() {
+    if (nameRequired) return;   // אין דילוג כשהשם חובה
     markEditorAsked();
     closeModal("name-modal");
   }
@@ -3315,9 +3335,8 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   function maybeAskEditorName() {
     if (!CLOUD) return;
     if ($("#name-modal") && $("#name-modal").classList.contains("open")) return;
-    let asked = false;
-    try { asked = !!localStore.getItem(EDITOR_ASKED_KEY); } catch (e) {}
-    if (asked || editorName) { markEditorAsked(); return; }
+    // השם חובה: גם מי שכבר נשאל ודילג (asked=1 בלי שם) יתבקש שוב
+    if (validEditorName(editorName)) { markEditorAsked(); return; }
     openNameModal(true);
   }
 
@@ -5609,8 +5628,8 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
 
   /* ------------ ui chrome ------------ */
   function openModal(id) { $("#" + id).classList.add("open"); }
-  function closeModal(id) { $("#" + id).classList.remove("open"); if (id === "count-modal") setCountingUi(false); }
-  function closeAllModals() { $$(".overlay.open").forEach((el) => el.classList.remove("open")); setCountingUi(false); }
+  function closeModal(id) { if (id === "name-modal" && nameRequired) return; $("#" + id).classList.remove("open"); if (id === "count-modal") setCountingUi(false); }
+  function closeAllModals() { $$(".overlay.open").forEach((el) => { if (el.id === "name-modal" && nameRequired) return; el.classList.remove("open"); }); setCountingUi(false); }
 
   function confirmModal(title, message, okLabel, onOk, opts) {
     $("#confirm-title").textContent = title;
