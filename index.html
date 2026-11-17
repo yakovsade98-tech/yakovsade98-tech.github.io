@@ -1179,6 +1179,14 @@ body.counting .fab { display: none !important; }
   #count-qty { font-size: 40px; }
 }
 
+.conn-banner {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  margin: 0 0 14px; padding: 12px 14px; border-radius: 10px;
+  background: var(--danger-bg); color: var(--danger); font-weight: 600; font-size: 14px; line-height: 1.5;
+}
+.conn-banner[hidden] { display: none; }
+.conn-banner > span { flex: 1 1 220px; }
+.conn-banner .nowrap { white-space: nowrap; font-family: ui-monospace, monospace; font-size: 12px; }
 </style>
 </head>
 <body>
@@ -1234,6 +1242,10 @@ body.counting .fab { display: none !important; }
       </aside>
 
       <main class="main">
+        <div class="conn-banner" id="conn-banner" role="alert" hidden>
+          <span id="conn-banner-text">לא ניתן לטעון את המלאי מהשרת.</span>
+          <button class="btn btn-outline" type="button" id="conn-retry">נסה שוב</button>
+        </div>
         <section class="dash" aria-label="סיכום מלאי">
           <article class="card stat">
             <div class="label">פריטים</div>
@@ -1656,6 +1668,23 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   <script>(function () {
   "use strict";
 
+  /* localStorage can be missing or throw (iPhone "block all cookies", in-app browsers, private modes).
+     Never let that stop the app: fall back to memory for this visit. */
+  const localStore = (function () {
+    let real = null;
+    try { real = window.localStorage || null; if (real) real.getItem("__yuvalim_probe__"); } catch (e) { real = null; }
+    const mem = {};
+    const has = (k) => Object.prototype.hasOwnProperty.call(mem, k);
+    return {
+      getItem(k) {
+        if (real) { try { const v = real.getItem(k); if (v != null || !has(k)) return v; } catch (e) {} }
+        return has(k) ? mem[k] : null;
+      },
+      setItem(k, v) { mem[k] = String(v); if (real) real.setItem(k, v); },
+      removeItem(k) { delete mem[k]; if (real) { try { real.removeItem(k); } catch (e) {} } }
+    };
+  })();
+
   /* ===== כתובת השרת (Cloudflare Worker) =====
      ריק = מצב מקומי בלבד (עריכה חופשית, שמירה בדפדפן בלבד). */
   const BACKEND_URL = "https://yuvalim-inventory.yuvalim.workers.dev";
@@ -1950,7 +1979,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   let sentHistory = [];      // saved entries not yet seen in the server's history list
   const histState = { server: null, loadedAt: 0, loading: null, error: "" };
   let editorName = "";
-  try { editorName = localStorage.getItem(EDITOR_KEY) || ""; } catch (e) {}
+  try { editorName = localStore.getItem(EDITOR_KEY) || ""; } catch (e) {}
   let quickCacheTimer = null;
   let idleRenderTimer = null;
   let holdState = null;
@@ -1977,7 +2006,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
 
   function load() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStore.getItem(STORAGE_KEY);
       if (!raw) return;
       const data = JSON.parse(raw);
       if (!data || !Array.isArray(data.items)) return;
@@ -1992,13 +2021,13 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       console.warn("load failed", e);
     }
     try {
-      const t = localStorage.getItem(THEME_KEY);
+      const t = localStore.getItem(THEME_KEY);
       if (t != null) state.settings.darkMode = t === "1";
     } catch (e) {}
   }
 
   function saveTheme() {
-    try { localStorage.setItem(THEME_KEY, state.settings.darkMode ? "1" : "0"); } catch (e) {}
+    try { localStore.setItem(THEME_KEY, state.settings.darkMode ? "1" : "0"); } catch (e) {}
     writeCache();
   }
 
@@ -2013,7 +2042,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       fromCloud: CLOUD ? true : undefined
     };
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      localStore.setItem(STORAGE_KEY, JSON.stringify(payload));
     } catch (e) {
       showToast("לא ניתן לשמור — ייתכן שהאחסון מלא");
     }
@@ -2046,7 +2075,15 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
 
   async function apiGet() {
     const url = BACKEND_URL + (BACKEND_URL.includes("?") ? "&" : "?") + "action=get&t=" + Date.now();
-    const res = await fetch(url, { method: "GET", cache: "no-store", redirect: "follow" });
+    const opts = { method: "GET", cache: "no-store", redirect: "follow" };
+    let timer = null;
+    if (typeof AbortController !== "undefined") {
+      const ctl = new AbortController();
+      opts.signal = ctl.signal;
+      timer = setTimeout(() => ctl.abort(), 15000);
+    }
+    let res;
+    try { res = await fetch(url, opts); } finally { clearTimeout(timer); }
     if (!res.ok) throw new Error("HTTP " + res.status);
     return res.json();
   }
@@ -2108,9 +2145,10 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       if (force || remoteVersion !== sync.version || !sync.loadedOnce) {
         if (!sync.loadedOnce && remoteVersion === 0 && !sync.cacheFromCloud && state.items.length) {
           // this device had a local-only inventory from before the cloud — keep it for upload
-          try { localStorage.setItem(LEGACY_KEY, JSON.stringify(sharedPayload())); } catch (e) {}
+          try { localStore.setItem(LEGACY_KEY, JSON.stringify(sharedPayload())); } catch (e) {}
         }
         applyRemote(resp);
+        sync.loadedOnce = true;
         render();
       }
       sync.loadedOnce = true;
@@ -2199,8 +2237,17 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     if (!pill || !txt) return;
     let cls = "ok", label = "נשמר";
     if (sync.saving || sync.dirty) { cls = "busy"; label = "שומר…"; }
-    else if (!sync.online) { cls = "err"; label = "אין חיבור · עותק שמור"; }
+    else if (!sync.online) { cls = "err"; label = sync.loadedOnce || state.items.length ? "אין חיבור · עותק שמור" : "אין חיבור לשרת"; }
     else if (!sync.loadedOnce) { cls = "busy"; label = "טוען…"; }
+    const banner = $("#conn-banner");
+    if (banner) {
+      const show = !sync.online && !sync.loadedOnce && !sync.fetching;
+      banner.hidden = !show;
+      const bt = $("#conn-banner-text");
+      if (show && bt) bt.innerHTML = state.items.length
+        ? "אין חיבור לשרת המלאי. מוצג העותק האחרון שנשמר במכשיר הזה, ייתכן שהוא לא מעודכן."
+        : "לא ניתן לטעון את המלאי מהשרת. בדקו את החיבור לאינטרנט ונסו שוב. אם יש בטלפון סינון גלישה או שאתם ברשת מוגבלת, ייתכן שהכתובת <bdi dir='ltr' class='nowrap'>yuvalim-inventory.yuvalim.workers.dev</bdi> חסומה בה.";
+    }
     pill.className = "sync-pill cloud-only " + cls;
     txt.textContent = label;
     pill.title = label + (sync.updatedAt ? " · עודכן לאחרונה " + new Date(sync.updatedAt).toLocaleString("he-IL") : "");
@@ -2209,7 +2256,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   function markEditorAsked() {
-    try { localStorage.setItem(EDITOR_ASKED_KEY, "1"); } catch (e) {}
+    try { localStore.setItem(EDITOR_ASKED_KEY, "1"); } catch (e) {}
   }
 
   function openNameModal(firstTime) {
@@ -2240,7 +2287,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     if (!CLOUD) return;
     if ($("#name-modal") && $("#name-modal").classList.contains("open")) return;
     let asked = false;
-    try { asked = !!localStorage.getItem(EDITOR_ASKED_KEY); } catch (e) {}
+    try { asked = !!localStore.getItem(EDITOR_ASKED_KEY); } catch (e) {}
     if (asked || editorName) { markEditorAsked(); return; }
     openNameModal(true);
   }
@@ -2256,9 +2303,9 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
 
   function offerLegacyUpload() {
     let legacy = null;
-    try { legacy = JSON.parse(localStorage.getItem(LEGACY_KEY) || "null"); } catch (e) {}
+    try { legacy = JSON.parse(localStore.getItem(LEGACY_KEY) || "null"); } catch (e) {}
     if (!legacy || !Array.isArray(legacy.items) || !legacy.items.length) return;
-    if (state.items.length) { try { localStorage.removeItem(LEGACY_KEY); } catch (e) {} return; }
+    if (state.items.length) { try { localStore.removeItem(LEGACY_KEY); } catch (e) {} return; }
     confirmModal(
       "העלאת המלאי מהמכשיר",
       "במכשיר הזה שמורים " + legacy.items.length + " פריטים מלפני החיבור לענן. להעלות אותם כדי שכולם יראו אותם?",
@@ -2268,7 +2315,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
         state.categories = Array.isArray(legacy.categories) ? legacy.categories.slice() : [];
         refreshCustomCols();
         ensureCategoryList();
-        try { localStorage.removeItem(LEGACY_KEY); } catch (e) {}
+        try { localStore.removeItem(LEGACY_KEY); } catch (e) {}
         addHistory("import", { name: "מלאי מהמכשיר" }, "העלאה לענן", "0 פריטים", state.items.length + " פריטים");
         persist();
         render();
@@ -2805,14 +2852,14 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   function setEditorName(v) {
     editorName = String(v || "").trim().slice(0, 40);
     try {
-      if (editorName) localStorage.setItem(EDITOR_KEY, editorName);
-      else localStorage.removeItem(EDITOR_KEY);
+      if (editorName) localStore.setItem(EDITOR_KEY, editorName);
+      else localStore.removeItem(EDITOR_KEY);
     } catch (e) {}
   }
 
   function localHistory() {
     if (!localHist) {
-      try { localHist = JSON.parse(localStorage.getItem(LOCAL_HIST_KEY) || "[]"); } catch (e) { localHist = []; }
+      try { localHist = JSON.parse(localStore.getItem(LOCAL_HIST_KEY) || "[]"); } catch (e) { localHist = []; }
       if (!Array.isArray(localHist)) localHist = [];
     }
     return localHist;
@@ -2820,7 +2867,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   function writeLocalHistory() {
     const h = localHistory();
     if (h.length > 2000) h.splice(0, h.length - 2000);
-    try { localStorage.setItem(LOCAL_HIST_KEY, JSON.stringify(h)); } catch (e) {}
+    try { localStore.setItem(LOCAL_HIST_KEY, JSON.stringify(h)); } catch (e) {}
   }
 
   function addHistory(action, it, field, oldV, newV) {
@@ -3219,7 +3266,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   function readCountSession() {
     if (countSession) return countSession;
     try {
-      const raw = localStorage.getItem(COUNT_KEY);
+      const raw = localStore.getItem(COUNT_KEY);
       if (!raw) return null;
       const s = JSON.parse(raw);
       if (!s || !Array.isArray(s.itemIds) || !s.itemIds.length) return null;
@@ -3229,19 +3276,19 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
   function writeCountSession() {
     if (!countSession) {
-      try { localStorage.removeItem(COUNT_KEY); } catch (e) {}
+      try { localStore.removeItem(COUNT_KEY); } catch (e) {}
       return;
     }
     countSession.updatedAt = new Date().toISOString();
-    try { localStorage.setItem(COUNT_KEY, JSON.stringify(countSession)); } catch (e) {}
+    try { localStore.setItem(COUNT_KEY, JSON.stringify(countSession)); } catch (e) {}
   }
   function clearCountSession() {
     countSession = null;
-    try { localStorage.removeItem(COUNT_KEY); } catch (e) {}
+    try { localStore.removeItem(COUNT_KEY); } catch (e) {}
     updateCountChip();
   }
   function updateCountChip() {
-    const s = countSession || (function () { try { return JSON.parse(localStorage.getItem(COUNT_KEY) || "null"); } catch (e) { return null; } })();
+    const s = countSession || (function () { try { return JSON.parse(localStore.getItem(COUNT_KEY) || "null"); } catch (e) { return null; } })();
     const active = !!(s && Array.isArray(s.itemIds) && s.itemIds.length && s.phase !== "done");
     const chip = $("#chip-count");
     if (chip) chip.classList.toggle("active", active);
@@ -3987,7 +4034,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
       state.ui.query = "";
       state.ui.lowOnly = false;
       state.ui.customCols = [];
-      try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      try { localStore.removeItem(STORAGE_KEY); } catch (e) {}
       addHistory("delete-all", { name: "כל המלאי" }, "מחיקת הכל", count + " פריטים, " + catCount + " קטגוריות", "0");
       persist();
       render();
@@ -4305,7 +4352,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
     const empty = $("#empty-state");
     const hasData = state.items.length > 0;
 
-    empty.style.display = hasData ? "none" : "block";
+    empty.style.display = hasData || (CLOUD && !sync.loadedOnce) ? "none" : "block";
     wrap.style.display = hasData ? "" : "none";
     cards.style.display = hasData ? "" : "none";
     if (!hasData) {
@@ -5301,18 +5348,26 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
 
   function init() {
     load();
-    if (typeof window !== "undefined" && window.matchMedia && !localStorage.getItem(STORAGE_KEY) && localStorage.getItem(THEME_KEY) == null) {
+    if (typeof window !== "undefined" && window.matchMedia && !localStore.getItem(STORAGE_KEY) && localStore.getItem(THEME_KEY) == null) {
       if (window.matchMedia("(prefers-color-scheme: dark)").matches) state.settings.darkMode = true;
     }
     if (CLOUD) {
-      try { localStorage.removeItem("yuvalimInventory.editPassword"); } catch (e) {}
+      try { localStore.removeItem("yuvalimInventory.editPassword"); } catch (e) {}
       sync.online = true;
     }
     bind();
     setSyncStatus();
     render();
     if (CLOUD) {
-      fetchRemote(true).then(() => afterCloudReady());
+      let readyDone = false;
+      const whenLoaded = () => { render(); if (sync.loadedOnce && !readyDone) { readyDone = true; afterCloudReady(); } };
+      fetchRemote(true).then(whenLoaded);
+      const retry = $("#conn-retry");
+      if (retry) retry.addEventListener("click", () => {
+        retry.disabled = true;
+        fetchRemote(true).then(() => { retry.disabled = false; whenLoaded(); });
+      });
+      const lateReady = setInterval(() => { if (sync.loadedOnce) { clearInterval(lateReady); whenLoaded(); } }, 1000);
       setInterval(() => { if (!document.hidden) fetchRemote(false); }, POLL_MS);
       document.addEventListener("visibilitychange", () => { if (!document.hidden) fetchRemote(false); });
       window.addEventListener("focus", () => fetchRemote(false));
