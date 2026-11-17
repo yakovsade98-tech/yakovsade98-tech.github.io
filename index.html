@@ -468,7 +468,7 @@ table.items .sku { font-variant-numeric: tabular-nums; letter-spacing: .02em; fo
 
 /* Modals */
 .overlay {
-  position: fixed; inset: 0;
+  position: fixed; top: 0; right: 0; bottom: 0; left: 0;
   background: rgba(16, 23, 34, 0.48);
   display: none;
   align-items: center;
@@ -1766,13 +1766,13 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   function escapeHtml(s) {
-    return String(s ?? "").replace(/[&<>"']/g, (c) => ({
+    return String((s == null ? "" : s)).replace(/[&<>"']/g, (c) => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
     }[c]));
   }
 
   function normalizeHeader(h) {
-    return String(h ?? "")
+    return String((h == null ? "" : h))
       .replace(/[\u200f\u200e\u202a-\u202e\u00a0\u200b]/g, " ")
       .replace(/[״″‟”"«»]/g, '"')
       .replace(/[׳'’`]/g, "'")
@@ -1794,14 +1794,14 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   function customFieldName(h) {
-    const cleaned = String(h ?? "")
+    const cleaned = String((h == null ? "" : h))
       .replace(/[\u200f\u200e\u202a-\u202e\u00a0\u200b]/g, " ")
       .replace(/\s+/g, " ")
       .trim()
       .replace(/[:：]+$/g, "")
       .replace(/^["״″‟”«»'׳’`]+|["״″‟”«»'׳’`]+$/g, "")
       .trim();
-    return cleaned || String(h ?? "").trim() || "שדה";
+    return cleaned || String((h == null ? "" : h)).trim() || "שדה";
   }
 
   const GENERIC_HEADER_ALIASES = new Set([
@@ -5347,6 +5347,7 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
   }
 
   function init() {
+    window.__inventoryStarted = true;
     load();
     if (typeof window !== "undefined" && window.matchMedia && !localStore.getItem(STORAGE_KEY) && localStore.getItem(THEME_KEY) == null) {
       if (window.matchMedia("(prefers-color-scheme: dark)").matches) state.settings.darkMode = true;
@@ -5380,6 +5381,21 @@ t.sheetStubs=true}if(t.type=="array"){t.type="binary";var a=xk(e,t);t.type="arra
 
   document.addEventListener("DOMContentLoaded", init);
 })();
+</script>
+<script>
+  /* ES5 only: shown when the main script could not run at all (very old browser). */
+  (function () {
+    function check() {
+      if (window.__inventoryStarted) return;
+      var d = document.createElement("div");
+      d.setAttribute("role", "alert");
+      d.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:9999;background:#FDECEA;color:#8A1C12;padding:14px 16px;font:600 15px/1.5 system-ui,sans-serif;text-align:right;direction:rtl;border-bottom:1px solid #E8B4B0";
+      d.textContent = "הדפדפן בטלפון הזה ישן מדי ולא מצליח להציג את המלאי. עדכנו את הדפדפן (בגלקסי: Galaxy Store ← Samsung Internet ← עדכון) או פתחו את הקישור ב־Chrome.";
+      document.body.appendChild(d);
+    }
+    if (document.readyState === "complete") setTimeout(check, 1500);
+    else window.addEventListener("load", function () { setTimeout(check, 1500); });
+  })();
 </script>
 </body>
 </html>
